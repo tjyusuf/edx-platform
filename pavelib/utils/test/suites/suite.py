@@ -5,7 +5,7 @@ import sys
 import subprocess
 
 from paver import tasks
-from paver.easy import sh, call_task
+from paver.easy import sh
 
 from pavelib.utils.process import kill_process
 
@@ -67,15 +67,11 @@ class TestSuite(object):
         optimized files to a dedicated test static root. Optionally use
         a log file for collectstatic output.
         """
-        opts_dict = {'settings': 'test_static_optimized'}
-        if log_dir:
-            opts_dict.update({'collect_log_file': log_dir})
         print colorize('green', "Generating optimized static assets...")
-        call_task(
-            "pavelib.assets.update_assets",
-            args=opts_dict
-        )
-        # sh("paver update_assets --settings=test_static_optimized")
+        if not log_dir:
+            sh("paver update_assets --settings=test_static_optimized")
+        else:
+            sh("paver update_assets --settings=test_static_optimized --collect-log=log_dir")
 
     def run_test(self):
         """
