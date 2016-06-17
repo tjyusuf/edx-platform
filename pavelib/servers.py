@@ -213,8 +213,8 @@ def run_all_servers(options):
         # means that the optimized assets are ignored, so we skip collectstatic in that
         # case to save time.
         if settings != DEFAULT_SETTINGS:
-            collect_assets(['lms'], asset_settings_lms)
-            collect_assets(['studio'], asset_settings_cms)
+            collect_assets(['lms'], asset_settings_lms, "/dev/null")
+            collect_assets(['studio'], asset_settings_cms, "/dev/null")
 
         # Install an asset watcher to regenerate files that change
         call_task('pavelib.assets.watch_assets', options={'background': True})
