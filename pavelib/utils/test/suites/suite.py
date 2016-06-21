@@ -71,7 +71,9 @@ class TestSuite(object):
         if not log_dir:
             sh("paver update_assets --settings=test_static_optimized")
         else:
-            sh("paver update_assets --settings=test_static_optimized --collect-log=log_dir")
+            sh("paver update_assets --settings=test_static_optimized --collect-log={log_dir}".format(
+                log_dir=log_dir
+            ))
 
     def run_test(self):
         """
