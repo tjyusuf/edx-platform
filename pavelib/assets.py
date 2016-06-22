@@ -641,15 +641,26 @@ def restart_django_servers():
     ))
 
 
-def collect_assets(systems, settings, output_file):
+def collect_assets(systems, settings, debug_dict):
     """
     Collect static assets, including Django pipeline processing.
     `systems` is a list of systems (e.g. 'lms' or 'studio' or both)
     `settings` is the Django settings module to use.
+    `debug_dict` is describes where to pipe collectstatic output
     """
+
+    # unless specified, collectstatic (which can be very verbose) pipes to /dev/null
+    collectstatic_stdout_str = "> /dev/null"
+    if debug_dict["debug"]:
+        # pipe to console
+        collectstatic_stdout_str = ""
+    if debug_dict["collect_log"]:
+        # pipe to specified file
+        collectstatic_stdout_str = "> {output_file}".format(output_file=debug_dict["collect_log"])
+
     for sys in systems:
-        sh(django_cmd(sys, settings, "collectstatic --noinput > {logfile}".format(
-            logfile=output_file
+        sh(django_cmd(sys, settings, "collectstatic --noinput {logfile_str}".format(
+            logfile_str=collectstatic_stdout_str
         )))
         print("\t\tFinished collecting {} assets.".format(sys))
 
@@ -766,8 +777,8 @@ def update_assets(args):
         help="list of themes to compile sass for",
     )
     parser.add_argument(
-        '--collect-log', dest='collect_log_file', default="/dev/null",
-        help="When running collectstatic, direct output to this log file",
+        '--collect-log', dest='collect_log_file', default=None,
+        help="When running collectstatic, direct output to specified log file",
     )
     args = parser.parse_args(args)
 
@@ -779,8 +790,9 @@ def update_assets(args):
     # Compile sass for themes and system
     execute_compile_sass(args)
 
+    collectstatic_debug_dict = {"debug": args.debug, "collect_log": args.collect_log_file}
     if args.collect:
-        collect_assets(args.system, args.settings, args.collect_log_file)
+        collect_assets(args.system, args.settings, collectstatic_debug_dict)
 
     if args.watch:
         call_task(

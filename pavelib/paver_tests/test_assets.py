@@ -3,6 +3,7 @@
 import ddt
 import os
 from unittest import TestCase
+from pavelib.assets import collect_assets
 from paver.easy import call_task, path
 from mock import patch
 from watchdog.observers.polling import PollingObserver
@@ -202,3 +203,14 @@ class TestPaverWatchAssetTasks(TestCase):
                 self.assertIsInstance(sass_watcher_args[0], PollingObserver)
                 self.assertIsInstance(sass_watcher_args[1], list)
                 self.assertItemsEqual(sass_watcher_args[1], self.expected_sass_directories)
+
+class test_collect_assets(PaverTestCase):
+    """
+    Test the collectstatic process call
+    """
+    def setUp(self):
+        pass
+
+    def test_collect_assets_debug(self):
+        debug_tuple = {"debug": False, "collect_log": None}
+        # TODO
