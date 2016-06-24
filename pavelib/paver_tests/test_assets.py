@@ -212,5 +212,5 @@ class test_collect_assets(PaverTestCase):
         pass
 
     def test_collect_assets_debug(self):
-        debug_tuple = {"debug": False, "collect_log": None}
+        collect_assets("foo", "bar", debug=True)
         # TODO
