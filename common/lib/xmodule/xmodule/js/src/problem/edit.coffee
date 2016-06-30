@@ -583,7 +583,7 @@ class @MarkdownEditingDescriptor extends XModule.Descriptor
       var responseTypesSelector = responseTypes.join(', ');
 
       // these will be placed at outside the end of responsetype
-      var independentTagNames = ['solution'];
+      var independentTagNames = [];
       var independentTagNodes = [];
 
       // make temporary xml
