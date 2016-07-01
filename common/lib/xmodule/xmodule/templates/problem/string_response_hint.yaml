@@ -37,7 +37,6 @@ data:   |
                 <stringequalhint answer="California">California is the third largest state, with 155,959 square miles.</stringequalhint>
                 <textline label="Which U.S. state has the largest land area?" size="20"/>
             </stringresponse>
-
             <demandhint>
                 <hint>Consider the square miles, not population.</hint>
                 <hint>Consider all 50 states, not just the continental United States.</hint>

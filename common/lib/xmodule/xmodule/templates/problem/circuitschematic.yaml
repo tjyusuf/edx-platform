@@ -39,17 +39,17 @@ data: |
       else:
         correct = ['incorrect']
       </answer>
-        <solution>
-            <div class="detailed-solution">
-                <p>Explanation</p>
-                <p>
-                    You can form a voltage divider that evenly divides the input
-                    voltage with two identically valued resistors, with the sampled
-                    voltage taken in between the two.
-                </p>
-                <p><img src="/static/images/voltage_divider.png" alt=""/></p>
-            </div>
-          </solution>
+            <solution>
+                <div class="detailed-solution">
+                    <p>Explanation</p>
+                    <p>
+                        You can form a voltage divider that evenly divides the input
+                        voltage with two identically valued resistors, with the sampled
+                        voltage taken in between the two.
+                    </p>
+                    <p><img src="/static/images/voltage_divider.png" alt=""/></p>
+                </div>
+            </solution>
         </schematicresponse>
 
         <schematicresponse>
