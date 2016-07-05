@@ -1261,8 +1261,7 @@ base_vendor_js = [
     'js/vendor/requirejs/require.js',
     'js/RequireJS-namespace-undefine.js',
     'js/vendor/URI.min.js',
-    'common/js/vendor/backbone.js',
-    'edx-pattern-library/js/modernizr-custom.js',
+    'common/js/vendor/backbone.js'
 ]
 
 main_vendor_js = base_vendor_js + [
@@ -1703,8 +1702,6 @@ REQUIRE_JS_PATH_OVERRIDES = {
     'js/student_profile/views/learner_profile_factory': 'js/student_profile/views/learner_profile_factory.js',
     'js/courseware/courseware_factory': 'js/courseware/courseware_factory.js',
     'js/groups/views/cohorts_dashboard_factory': 'js/groups/views/cohorts_dashboard_factory.js',
-    'afontgarde': 'edx-pattern-library/js/afontgarde.js',
-    'edxicons': 'edx-pattern-library/js/edx-icons.js',
     'draggabilly': 'js/vendor/draggabilly.js'
 }
 ################################# CELERY ######################################

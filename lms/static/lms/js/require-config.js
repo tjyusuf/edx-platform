@@ -41,7 +41,6 @@
         defineDependency('Logger', 'logger');
         defineDependency('URI', 'URI');
         defineDependency('Backbone', 'backbone');
-        defineDependency('Modernizr', 'modernizr');
 
         // Add the UI Toolkit helper classes that have been installed in the 'edx' namespace
         defineDependency('edx.HtmlUtils', 'edx-ui-toolkit/js/utils/html-utils');
@@ -82,9 +81,6 @@
             'URI': 'js/vendor/URI.min',
             'string_utils': 'js/src/string_utils',
             'utility': 'js/src/utility',
-            'modernizr': 'edx-pattern-library/js/modernizr-custom',
-            'afontgarde': 'edx-pattern-library/js/afontgarde',
-            'edxicons': 'edx-pattern-library/js/edx-icons',
             'draggabilly': 'js/vendor/draggabilly',
 
             // Files needed by OVA

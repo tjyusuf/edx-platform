@@ -470,6 +470,9 @@
 
             .badges-steps {
                 display: table;
+                a, .badge-link {
+                    background: $white;
+                }
             }
 
             .image-container{
