@@ -7,13 +7,14 @@
  */
 define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
     'js/views/modals/base_modal', 'date', 'js/views/utils/xblock_utils',
-    'js/utils/date_utils'
+    'js/utils/date_utils', 'edx-ui-toolkit/js/utils/html-utils',
+    'edx-ui-toolkit/js/utils/string-utils'
 ], function(
-    $, Backbone, _, gettext, BaseView, BaseModal, date, XBlockViewUtils, DateUtils
+    $, Backbone, _, gettext, BaseView, BaseModal, date, XBlockViewUtils, DateUtils, HtmlUtils, StringUtils
 ) {
     'use strict';
     var CourseOutlineXBlockModal, SettingsXBlockModal, PublishXBlockModal, AbstractEditor, BaseDateEditor,
-        ReleaseDateEditor, DueDateEditor, GradingEditor, PublishEditor, StaffLockEditor,
+        ReleaseDateEditor, DueDateEditor, GradingEditor, PublishEditor, ContentVisibilityEditor,
         VerificationAccessEditor, TimedExaminationPreferenceEditor, AccessEditor;
 
     CourseOutlineXBlockModal = BaseModal.extend({
@@ -105,9 +106,9 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
     SettingsXBlockModal = CourseOutlineXBlockModal.extend({
 
         getTitle: function () {
-            return interpolate(
-                gettext('%(display_name)s Settings'),
-                { display_name: this.model.get('display_name') }, true
+            return StringUtils.interpolate(
+                gettext('{display_name} Settings'),
+                { display_name: this.model.get('display_name') }
             );
         },
 
@@ -115,9 +116,10 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
             var message = '';
             var tabs = this.options.tabs;
             if (!tabs || tabs.length < 2) {
-                message = interpolate(
-                    gettext('Change the settings for %(display_name)s'),
-                    { display_name: this.model.get('display_name') }, true);
+                message = StringUtils.interpolate(
+                    gettext('Change the settings for {display_name}'),
+                    { display_name: this.model.get('display_name') }
+                );
             }
             return message;
         },
@@ -127,7 +129,7 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
             if (tabs && tabs.length > 0) {
                 if (tabs.length > 1) {
                     var tabsTemplate = this.loadTemplate('settings-modal-tabs');
-                    this.$('.modal-section').html(tabsTemplate({tabs: tabs}));
+                    HtmlUtils.setHtml(this.$('.modal-section'), HtmlUtils.HTML(tabsTemplate({tabs: tabs})));
                     _.each(this.options.tabs, function(tab) {
                         this.options.editors.push.apply(
                             this.options.editors,
@@ -196,16 +198,16 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
         },
 
         getTitle: function () {
-            return interpolate(
-                gettext('Publish %(display_name)s'),
-                { display_name: this.model.get('display_name') }, true
+            return StringUtils.interpolate(
+                gettext('Publish {display_name}'),
+                { display_name: this.model.get('display_name') }
             );
         },
 
         getIntroductionMessage: function () {
-            return interpolate(
-                gettext('Publish all unpublished changes for this %(item)s?'),
-                { item: this.options.xblockType }, true
+            return StringUtils.interpolate(
+                gettext('Publish all unpublished changes for this {item}?'),
+                { item: this.options.xblockType }
             );
         },
 
@@ -233,7 +235,7 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
                 enable_timed_exam: this.options.enable_timed_exams
             }, this.getContext()));
 
-            this.$el.html(html);
+            HtmlUtils.setHtml(this.$el, HtmlUtils.HTML(html));
             this.parentElement.append(this.$el);
         },
 
@@ -590,11 +592,23 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
         }
     });
 
-    StaffLockEditor = AbstractEditor.extend({
-        templateName: 'staff-lock-editor',
-        className: 'edit-staff-lock',
-        isModelLocked: function() {
-            return this.model.get('has_explicit_staff_lock');
+    ContentVisibilityEditor = AbstractEditor.extend({
+        templateName: 'content-visibility-editor',
+        className: 'edit-content-visibility',
+        events: {
+            'change input[name=content-visibility]': 'toggleUnlockWarning'
+        },
+
+        modelVisibility: function() {
+            if (this.model.get('visibility')) {
+                return this.model.get('visibility');
+            }
+            else if (this.model.get('has_explicit_staff_lock')) {
+                return 'staff_only';
+            }
+            else {
+                return 'visible';
+            }
         },
 
         isAncestorLocked: function() {
@@ -603,33 +617,63 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
 
         afterRender: function () {
             AbstractEditor.prototype.afterRender.call(this);
-            this.setLock(this.isModelLocked());
+            this.setVisibility(this.modelVisibility());
+            this.$('input[name=content-visibility]:checked').change();
         },
 
-        setLock: function(value) {
-            this.$('#staff_lock').prop('checked', value);
+        setVisibility: function(value) {
+            this.$('input[name=content-visibility][value='+value+']').prop('checked', true);
         },
 
-        isLocked: function() {
-            return this.$('#staff_lock').is(':checked');
+        currentVisibility: function() {
+            return this.$('input[name=content-visibility]:checked').val();
         },
 
         hasChanges: function() {
-            return this.isModelLocked() !== this.isLocked();
+            return this.modelVisibility() !== this.currentVisibility();
+        },
+
+        toggleUnlockWarning: function() {
+            var warning = this.$('.staff-lock .tip-warning');
+            if (warning) {
+                var display;
+                if (this.currentVisibility() !== 'staff_only') {
+                    display = 'block';
+                } else {
+                    display = 'none';
+                }
+                $.each(warning, function(_, element) {
+                    element.style.display = display;
+                });
+            }
         },
 
         getRequestData: function() {
-            return this.hasChanges() ? {
-                publish: 'republish',
-                metadata: {
-                    visible_to_staff_only: this.isLocked() ? true : null
-                    }
-                } : {};
+            if (this.hasChanges()) {
+                var metadata = {};
+                // TODO: as part of TNL-4904, un-comment the below content_visibility lines
+                if (this.currentVisibility() === 'staff_only') {
+                    metadata.visible_to_staff_only = true;
+                    // metadata.content_visibility = null;
+                }
+                else {
+                    metadata.visible_to_staff_only = null; // is false better here?
+                    // metadata.content_visibility = this.currentVisibility();
+                }
+
+                return {
+                    publish: 'republish',
+                    metadata: metadata
+                };
+            }
+            else {
+                return {};
+            }
         },
 
         getContext: function () {
             return {
-                hasExplicitStaffLock: this.isModelLocked(),
+                visibility: this.modelVisibility(),
                 ancestorLocked: this.isAncestorLocked()
             };
         }
@@ -749,35 +793,33 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
 
         getEditModal: function (xblockInfo, options) {
             var editors = [];
-            var tabs = [];
-
-            if (xblockInfo.isChapter()) {
-                editors = [ReleaseDateEditor, StaffLockEditor];
-            } else if (xblockInfo.isSequential()) {
-                tabs.push({
+            var tabs = [
+                {
                     name: 'basic',
                     displayName: gettext('Basic'),
-                    editors: [ReleaseDateEditor, GradingEditor, DueDateEditor, StaffLockEditor]
-                });
+                    editors: []
+                },
+                {
+                    name: 'advanced',
+                    displayName: gettext('Advanced'),
+                    editors: [ContentVisibilityEditor]
+                }
+            ];
+
+            if (xblockInfo.isChapter()) {
+                tabs[0].editors = [ReleaseDateEditor];
+            } else if (xblockInfo.isSequential()) {
+                tabs[0].editors = [ReleaseDateEditor, GradingEditor, DueDateEditor];
 
                 if (options.enable_proctored_exams || options.enable_timed_exams) {
-                    tabs.push({
-                        name: 'advanced',
-                        displayName: gettext('Advanced'),
-                        editors: [TimedExaminationPreferenceEditor]
-                    });
+                    tabs[1].editors.push(TimedExaminationPreferenceEditor);
                 }
 
                 if (typeof(xblockInfo.get('is_prereq')) !== 'undefined') {
-                    tabs.push({
-                        name: 'access',
-                        // Translators: This label refers to access to course content.
-                        displayName: gettext('Access'),
-                        editors: [AccessEditor]
-                    });
+                    tabs[1].editors.push(AccessEditor);
                 }
             } else if (xblockInfo.isVertical()) {
-                editors = [StaffLockEditor];
+                editors = [ContentVisibilityEditor];
 
                 if (xblockInfo.hasVerifiedCheckpoints()) {
                     editors.push(VerificationAccessEditor);
@@ -790,8 +832,14 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
                     tab.editors = _.without(tab.editors, ReleaseDateEditor, DueDateEditor);
                 });
             }
+            // if only advanced editors exist, no tabs
+            if (tabs[0].editors.length === 0) {
+                editors = tabs[1].editors;
+                tabs = [];
+            }
+
             return new SettingsXBlockModal($.extend({
-                tabs: tabs,
+                tabs: editors !== [] ? tabs : [],
                 editors: editors,
                 model: xblockInfo
             }, options));

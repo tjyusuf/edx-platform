@@ -569,12 +569,15 @@ class CourseOutlinePage(CoursePage, CourseOutlineContainer):
         self.q(css=".action-save").first.click()
         self.wait_for_ajax()
 
-    def select_advanced_tab(self):
+    def select_advanced_tab(self, desired_item='special_exam'):
         """
         Select the advanced settings tab
         """
         self.q(css=".settings-tab-button[data-tab='advanced']").first.click()
-        self.wait_for_element_presence('input.no_special_exam', 'Special exam settings fields not present.')
+        if desired_item == 'special_exam':
+            self.wait_for_element_presence('input.no_special_exam', 'Special exam settings fields not present.')
+        if desired_item == 'gated_content':
+            self.wait_for_element_visibility('#is_prereq', 'Gating settings fields are present.')
 
     def make_exam_proctored(self):
         """
@@ -658,13 +661,6 @@ class CourseOutlinePage(CoursePage, CourseOutlineContainer):
             return False
 
         return True
-
-    def select_access_tab(self):
-        """
-        Select the access settings tab.
-        """
-        self.q(css=".settings-tab-button[data-tab='access']").first.click()
-        self.wait_for_element_visibility('#is_prereq', 'Gating settings fields are present.')
 
     def make_gating_prerequisite(self):
         """
@@ -1041,15 +1037,21 @@ class CourseOutlineModal(object):
         """
         Returns true if the explict staff lock checkbox is checked, false otherwise.
         """
-        return self.find_css('#staff_lock')[0].is_selected()
+        if not self.find_css('input[name=content-visibility]').visible:
+            self.find_css(".settings-tab-button[data-tab=advanced]").click()
+        return self.find_css('input[name=content-visibility][value=staff_only]')[0].is_selected()
 
     @is_explicitly_locked.setter
     def is_explicitly_locked(self, value):
         """
-        Checks the explicit staff lock box if value is true, otherwise unchecks the box.
+        Checks the explicit staff lock box if value is true, otherwise selects "visible".
         """
-        if value != self.is_explicitly_locked:
-            self.find_css('label[for="staff_lock"]').click()
+        if not self.find_css('input[name=content-visibility]').visible:
+            self.find_css(".settings-tab-button[data-tab=advanced]").click()
+        if value:
+            self.find_css('input[name=content-visibility][value=staff_only]').click()
+        else:
+            self.find_css('input[name=content-visibility][value=visible]').click()
         EmptyPromise(lambda: value == self.is_explicitly_locked, "Explicit staff lock is updated").fulfill()
 
     def shows_staff_lock_warning(self):

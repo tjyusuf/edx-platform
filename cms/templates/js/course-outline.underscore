@@ -179,12 +179,10 @@ if (is_proctored_exam) {
                 </div>
                 <div class="status-hide-after-due">
                     <p>
-                        <% if (!is_proctored_exam && xblockInfo.get('hide_after_due')) { %>
+                        <!--TODO: make the following check use the new fields defined in TNL-4904-->
+                        <% if (xblockInfo.get('hide_after_due')) { %>
                             <span class="icon fa fa-eye-slash" aria-hidden="true"></span>
-                            <span class="status-hide-after-due-value"> <%- gettext("Exam will remain hidden after due date") %> </span>
-                        <% } else { %>
-                            <span class="icon fa fa-eye" aria-hidden="true"></span>
-                            <span class="status-hide-after-due-value"> <%- gettext("Exam will be visible after due date") %> </span>
+                            <span class="status-hide-after-due-value"> <%- gettext("Subsection will remain hidden after due date") %> </span>
                         <% } %>
                     </p>
                 </div>
