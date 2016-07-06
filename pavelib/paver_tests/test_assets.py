@@ -204,13 +204,52 @@ class TestPaverWatchAssetTasks(TestCase):
                 self.assertIsInstance(sass_watcher_args[1], list)
                 self.assertItemsEqual(sass_watcher_args[1], self.expected_sass_directories)
 
-class test_collect_assets(PaverTestCase):
-    """
-    Test the collectstatic process call
-    """
-    def setUp(self):
-        pass
 
-    def test_collect_assets_debug(self):
-        collect_assets("foo", "bar", debug=True)
-        # TODO
+@ddt.ddt
+class TestCollectAssets(PaverTestCase):
+    """
+    Test the collectstatic process call.
+
+    ddt data is organized thusly:
+      * debug: whether or not collect_assets is called with the debug flag
+      * specified_log_location: used when collect_assets is called with a specific
+          log location for collectstatic output
+      * expected_log_location: the expected string to be used for piping collectstatic logs
+    """
+
+    @ddt.data(
+        [{"expected_log_location": "> /dev/null"}],  # pipe to /dev/null by default
+        [{"debug": True, "expected_log_location": ""}],  # pipe to console in debug mode
+        [{"debug": False, "expected_log_location": "> /dev/null"}],
+        [{
+            "specified_log_location": "/foo/bar.log",
+            "expected_log_location": "> /foo/bar.log"
+        }],  # can use specified log location
+        [{"systems": ["lms", "cms"], "expected_log_location": "> /dev/null"}],  # multiple systems can be called
+    )
+    @ddt.unpack
+    def test_collect_assets(self, options):
+        """
+        Ensure commands sent to the environment for collect_assets are as expected
+        """
+        log_loc = options.get("expected_log_location", None)
+        systems = options.get("systems", ["lms"])
+        expected_messages = self._set_expected_messages(log_location=log_loc, systems=systems)
+        collect_assets(
+            systems,
+            "devstack",
+            debug=options.get("debug", None),
+            collectstatic_log=options.get("specified_log_location", None)
+        )
+        self.assertEqual(self.task_messages, expected_messages)
+
+    def _set_expected_messages(self, log_location, systems):
+        expected_messages = []
+        for sys in systems:
+            expected_messages.append(
+                'python manage.py {system} --settings=devstack collectstatic --noinput {log_loc}'.format(
+                    system=sys,
+                    log_loc=log_location
+                )
+            )
+        return expected_messages
