@@ -10,6 +10,7 @@ ATTR_KEY_IS_AUTHENTICATED = 'edx-platform.is_authenticated'
 ATTR_KEY_USER_ID = 'edx-platform.user_id'
 ATTR_KEY_USERNAME = 'edx-platform.username'
 ATTR_KEY_USER_IS_STAFF = 'edx-platform.user_is_staff'
+ATTR_KEY_USER_PREFERENCES = 'edx-platform.user_preferences'
 
 
 class DjangoXBlockUserService(UserService):
@@ -69,6 +70,7 @@ class DjangoXBlockUserService(UserService):
             xblock_user.opt_attrs[ATTR_KEY_USER_ID] = django_user.id
             xblock_user.opt_attrs[ATTR_KEY_USERNAME] = django_user.username
             xblock_user.opt_attrs[ATTR_KEY_USER_IS_STAFF] = django_user.user_is_staff
+            xblock_user.opt_attrs[ATTR_KEY_USER_PREFERENCES] = django_user.preferences.model
         else:
             xblock_user.opt_attrs[ATTR_KEY_IS_AUTHENTICATED] = False
 
