@@ -830,6 +830,13 @@ class CourseFields(object):
         },
         scope=Scope.settings
     )
+    allow_unsupported_xblocks = Boolean(
+        display_name=_("Allow the creation of unsupported XBlocks"),
+        help=_(
+            "If set to True, XBlocks that are not supported by edX can be created in Studio. Scary legal text..."
+        ),
+        scope=Scope.settings, default=False
+    )
 
 
 class CourseModule(CourseFields, SequenceModule):  # pylint: disable=abstract-method
