@@ -244,6 +244,12 @@ class TestCollectAssets(PaverTestCase):
         self.assertEqual(self.task_messages, expected_messages)
 
     def _set_expected_messages(self, log_location, systems):
+        """
+        Returns a list of messages that are expected to be sent from paver
+         to the commandline for collectstatic functions. This list is constructed
+         based on the log location and systems being passed in.
+        """
+
         expected_messages = []
         for sys in systems:
             expected_messages.append(
