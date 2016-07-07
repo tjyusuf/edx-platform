@@ -1,0 +1,44 @@
+// pill button
+%ui-btn-pill {
+  border-radius: ($baseline/5);
+}
+// +Content - No List - Extends
+// ====================
+// removes list styling/spacing when using uls, ols for navigation and less content-centric cases
+%cont-no-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  text-indent: 0;
+
+  li {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+// +Content - Hidden Image Text - Extend
+// ====================
+// image-replacement hidden text
+%cont-text-hide {
+  text-indent: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+// +Content - Screenreader Text - Extend
+// ====================
+%cont-text-sr {
+    // clip has been deprecated but is still supported
+    clip: rect(1px 1px 1px 1px);
+    clip: rect(1px, 1px, 1px, 1px);
+    position: absolute;
+    margin: -1px;
+    height: 1px;
+    width: 1px;
+    border: 0;
+    padding: 0;
+    overflow: hidden;
+    // ensure there are spaces in sr text
+    word-wrap: normal;
+}
