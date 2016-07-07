@@ -5,7 +5,7 @@ End-to-end tests for the main LMS Dashboard (aka, Student Dashboard).
 import datetime
 from nose.plugins.attrib import attr
 
-from ..helpers import UniqueCourseTest
+from ..helpers import UniqueCourseTest, generate_course_key
 from ...fixtures.course import CourseFixture
 from ...pages.lms.auto_auth import AutoAuthPage
 from ...pages.lms.dashboard import DashboardPage
@@ -29,26 +29,61 @@ class BaseLmsDashboardTest(UniqueCourseTest):
         self.dashboard_page = DashboardPage(self.browser)
 
         # Configure some aspects of the test course and install the settings into the course
-        self.course_fixture = CourseFixture(
-            self.course_info["org"],
-            self.course_info["number"],
-            self.course_info["run"],
-            self.course_info["display_name"],
-        )
-        self.course_fixture.add_advanced_settings({
-            u"social_sharing_url": {u"value": "http://custom/course/url"}
-        })
-        self.course_fixture.install()
+        self.courses = {
+            'A': {
+                'org': 'test_org',
+                'number': self.unique_id,
+                'run': 'test_run_A',
+                'display_name': 'Test Course A'
+            },
+            'B': {
+                'org': 'test_org',
+                'number': self.unique_id,
+                'run': 'test_run_B',
+                'display_name': 'Test Course B'
+            },
+            'C': {
+                'org': 'test_org',
+                'number': self.unique_id,
+                'run': 'test_run_C',
+                'display_name': 'Test Course C'
+            }
+        }
 
-        # Create the test user, register them for the course, and authenticate
         self.username = "test_{uuid}".format(uuid=self.unique_id[0:6])
         self.email = "{user}@example.com".format(user=self.username)
-        AutoAuthPage(
-            self.browser,
-            username=self.username,
-            email=self.email,
-            course_id=self.course_id
-        ).visit()
+
+        for key, value in self.courses.iteritems():
+
+            org = value["org"]
+            number = value["number"]
+            run = value["run"]
+            display_name = value["display_name"]
+
+            self.course_key = generate_course_key(
+                org,
+                number,
+                run,
+            )
+
+            self.course_fixture = CourseFixture(
+                org,
+                number,
+                run,
+                display_name,
+            )
+            self.course_fixture.add_advanced_settings({
+                u"social_sharing_url": {u"value": "http://custom/course/url"}
+            })
+            self.course_fixture.install()
+
+            # Create the test user, register them for the course, and authenticate
+            AutoAuthPage(
+                self.browser,
+                username=self.username,
+                email=self.email,
+                course_id=self.course_key
+            ).visit()
 
         # Navigate the authenticated, enrolled user to the dashboard page and get testing!
         self.dashboard_page.visit()
@@ -230,6 +265,6 @@ class LmsDashboardA11yTest(BaseLmsDashboardTest):
         """
         Test the accessibility of the course listings
         """
-        course_listings = self.dashboard_page.get_course_listings()
-        self.assertEqual(len(course_listings), 1)
+        course_listings = self.dashboard_page.get_courses()
+        self.assertEqual(len(course_listings), 3)
         self.dashboard_page.a11y_audit.check_for_accessibility_errors()
