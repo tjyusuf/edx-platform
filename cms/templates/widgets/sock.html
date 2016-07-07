@@ -15,8 +15,7 @@ from django.core.urlresolvers import reverse
 
   <div class="wrapper-inner wrapper">
     <section class="sock" id="sock" aria-labelledby="sock-heading">
-        <h2 id="sock-heading" class="title sr">${_("{studio_name} Documentation").format(studio_name=settings.STUDIO_NAME)}</h2>
-
+        <h2 id="sock-heading" class="title sr sr-only">${_("{studio_name} Documentation").format(studio_name=settings.STUDIO_NAME)}</h2>
       <div class="support">
         <%!
         from django.conf import settings
