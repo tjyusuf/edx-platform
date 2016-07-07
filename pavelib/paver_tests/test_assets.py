@@ -259,3 +259,34 @@ class TestCollectAssets(PaverTestCase):
                 )
             )
         return expected_messages
+
+
+@ddt.ddt
+class TestUpdateAssetsTask(PaverTestCase):
+    """
+    These are nearly end-to-end tests, because they observe output from the commandline request,
+    but do not actually execute the commandline on the terminal/process
+    """
+
+    @ddt.data(
+        [{"expected_substring": "> /dev/null"}],  # go to /dev/null by default
+        [{"cmd_args": ["--debug"], "expected_substring": "collectstatic --noinput "}]  # TODO: make this regex
+    )
+    @ddt.unpack
+    def test_update_assets_task_collectstatic_log_arg(self, options):
+        """
+        Scoped test that only looks at what is passed to the collecstatic options
+        """
+        cmd_args = options.get("cmd_args", [""])
+        expected_substring = options.get("expected_substring", None)
+        call_task('pavelib.assets.update_assets', args=cmd_args)
+        self.assertTrue(self._assert_substring_in_list(self.task_messages, expected_substring))
+
+    def _assert_substring_in_list(self, messages_list, expected_substring):
+        """
+        Assert that a given string is somewhere in a list of strings
+        """
+        for message in messages_list:
+            if expected_substring in message:
+                return True
+        return False
