@@ -46,7 +46,7 @@ class ModuleStoreSerializer(object):
         fields['display_name'] = item.display_name_with_default
 
         fields['location:ID'] = unicode(item.location)
-        if "location" in fields:
+        if fields.get("location"):
             del fields['location']
 
         block_type = item.scope_ids.block_type
@@ -56,8 +56,9 @@ class ModuleStoreSerializer(object):
         label = fields['type']
         del fields['type']
 
-        if 'checklists' in fields:
-            del fields['checklists']
+        if block_type == 'course':
+            if 'checklists' in fields:
+                del fields['checklists']
 
         fields['org'] = course_key.org
         fields['course'] = course_key.course
@@ -84,31 +85,38 @@ class Command(BaseCommand):
 
         for course in mss.all_courses:
             RequestCache.clear_request_cache()
-            print course.id
+            log.info(course.id)
             location_to_node = {}
-            for item in modulestore().get_items(course.id):
+            # log.info("getting items for %s", unicode(course.id))
+            items = modulestore().get_items(course.id)
+            # log.info("items got!")
+
+            # log.info('serializing items for %s', unicode(course.id))
+            for item in items:
                 fields, label = mss.serialize_item(item, course.id)
 
                 for k, v in fields.iteritems():
+                    del fields[k]
                     fields[k] = coerce_types(v, ACCEPTABLE_TYPES)
 
-                if not isinstance(label, ACCEPTABLE_TYPES):
+                if not label.__class__ in ACCEPTABLE_TYPES:
                     label = unicode(label)
 
                 node = Node(label, **fields)
                 location_to_node.update({item.location: node})
 
+            # log.info('items serialized')
+
 
             tx = graph.begin()
 
-            for item in modulestore().get_items(course.id):
-                if item.has_children:
-                    for child_loc in item.get_children():
-                        parent_node = location_to_node.get(item.location)
-                        child_node = location_to_node.get(child_loc.location)
-                        if parent_node is not None and child_node is not None:
-                            relationship = Relationship(parent_node, "PARENT_OF", child_node)
-                            tx.create(relationship)
+            for item in items:
+                for child_loc in item.get_children():
+                    parent_node = location_to_node.get(item.location)
+                    child_node = location_to_node.get(child_loc.location)
+                    if parent_node is not None and child_node is not None:
+                        relationship = Relationship(parent_node, "PARENT_OF", child_node)
+                        tx.create(relationship)
             tx.commit()
 
 
