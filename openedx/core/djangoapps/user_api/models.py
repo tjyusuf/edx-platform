@@ -42,6 +42,7 @@ class UserPreference(models.Model):
         Arguments:
             user (User): The user whose preference should be set.
             preference_key (str): The key for the user preference.
+            default: The object to return if user does not have preference key set
 
         Returns:
             The user preference value, or default if one is not set.
@@ -51,6 +52,19 @@ class UserPreference(models.Model):
             return user_preference.value
         except cls.DoesNotExist:
             return default
+
+    @classmethod
+    def get_all_preferences(cls, user):
+        """
+        Returns all preferences for given user as a dictionary.
+
+        Note:
+            This method provides no authorization of access to the user preference.
+            Consider using user_api.preferences.api.get_user_preference instead if
+            this is part of a REST API request.
+        """
+        user_preferences = cls.objects.filter(user=user).values_list('key', 'value')
+        return dict(user_preferences)
 
 
 @receiver(pre_save, sender=UserPreference)
