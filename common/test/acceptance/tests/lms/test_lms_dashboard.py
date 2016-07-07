@@ -54,27 +54,23 @@ class BaseLmsDashboardTest(UniqueCourseTest):
         self.email = "{user}@example.com".format(user=self.username)
 
         for value in self.courses.iteritems():
-
-            org = value["org"]
-            number = value["number"]
-            run = value["run"]
-            display_name = value["display_name"]
-
             self.course_key = generate_course_key(
-                org,
-                number,
-                run,
+                value["org"],
+                value["number"],
+                value["run"],
             )
 
             self.course_fixture = CourseFixture(
-                org,
-                number,
-                run,
-                display_name,
+                value["org"],
+                value["number"],
+                value["run"],
+                value["display_name"],
             )
+
             self.course_fixture.add_advanced_settings({
                 u"social_sharing_url": {u"value": "http://custom/course/url"}
             })
+
             self.course_fixture.install()
 
             # Create the test user, register them for the course, and authenticate
