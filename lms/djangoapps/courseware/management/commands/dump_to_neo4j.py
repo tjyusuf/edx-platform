@@ -1,13 +1,16 @@
 import logging
 
 from django.core.management.base import BaseCommand
-from py2neo import Graph, Node, Relationship, authenticate, watch
+from py2neo import Graph, Node, Relationship, authenticate, Subgraph
 from py2neo.compat import integer, string, unicode
 from request_cache.middleware import RequestCache
 from xmodule.modulestore.django import modulestore
-from xmodule.partitions.partitions import UserPartition
 
 log = logging.getLogger(__name__)
+
+logger = logging.getLogger('neo4j.bolt')
+logger.propagate = False
+logger.disabled = True
 
 class ModuleStoreSerializer(object):
     """
@@ -75,33 +78,29 @@ class Command(BaseCommand):
 
         graph = Graph(password="edx", bolt=True)
         authenticate("localhost:7474", 'neo4j', 'edx')
+
+        print "deleting existing graph"
         graph.delete_all()
 
-        for course in mss.all_courses:
-            print course
+        for course in mss.all_courses[2:3]:
+            RequestCache.clear_request_cache()
+            print course.id
             location_to_node = {}
             for item in modulestore().get_items(course.id):
                 fields, label = mss.serialize_item(item, course.id)
 
                 for k, v in fields.iteritems():
-                    try:
-                        fields[k] = coerce_types(v, ACCEPTABLE_TYPES)
-                    except TypeError:
-                        import ipdb; ipdb.set_trace()
-                        coerce_types(v, ACCEPTABLE_TYPES)
-                        raise
+                    fields[k] = coerce_types(v, ACCEPTABLE_TYPES)
 
                 if not isinstance(label, ACCEPTABLE_TYPES):
                     label = unicode(label)
-                try:
-                    node = Node(label, **fields)
-                except TypeError:
-                    print label
-                    print fields
-                    raise
+
+                node = Node(label, **fields)
                 location_to_node.update({item.location: node})
 
+
             tx = graph.begin()
+
             for item in modulestore().get_items(course.id):
                 if item.has_children:
                     for child_loc in item.get_children():
@@ -113,13 +112,13 @@ class Command(BaseCommand):
             tx.commit()
 
 
-
 def coerce_types(value, acceptable_types):
-    if isinstance(value, (tuple, list, set, frozenset)) and not isinstance(value, UserPartition):
+
+    if value.__class__ in (tuple, list, set, frozenset):
         for index, element in enumerate(value):
             value[index] = unicode(element)
 
-    elif not isinstance(value, acceptable_types) or isinstance(value, UserPartition):
+    elif not value.__class__ in acceptable_types:
         value = unicode(value)
 
     return value
