@@ -83,7 +83,11 @@ class Command(BaseCommand):
         print "deleting existing graph"
         graph.delete_all()
 
+
         for course in mss.all_courses:
+
+            number_courses = 0
+
             RequestCache.clear_request_cache()
             log.info(course.id)
             location_to_node = {}
@@ -91,31 +95,32 @@ class Command(BaseCommand):
             items = modulestore().get_items(course.id)
             # log.info("items got!")
 
+            nodes = []
             # log.info('serializing items for %s', unicode(course.id))
+            tx = graph.begin()
             for item in items:
                 fields, label = mss.serialize_item(item, course.id)
 
                 for k, v in fields.iteritems():
-                    del fields[k]
                     fields[k] = coerce_types(v, ACCEPTABLE_TYPES)
 
                 if not label.__class__ in ACCEPTABLE_TYPES:
                     label = unicode(label)
 
                 node = Node(label, **fields)
+                tx.create(node)
                 location_to_node.update({item.location: node})
 
             # log.info('items serialized')
-
-
-            tx = graph.begin()
-
             for item in items:
+                # subgraph = Subgraph()
                 for child_loc in item.get_children():
                     parent_node = location_to_node.get(item.location)
                     child_node = location_to_node.get(child_loc.location)
                     if parent_node is not None and child_node is not None:
                         relationship = Relationship(parent_node, "PARENT_OF", child_node)
+                        # subgraph = relationship | subgraph
+
                         tx.create(relationship)
             tx.commit()
 
