@@ -1,12 +1,15 @@
-import unicodecsv
 import logging
-import os
 from collections import defaultdict
 
+import os
+import unicodecsv
 from boto.s3.key import Key
 from django.core.management.base import BaseCommand
+from py2neo import Graph, Node, Relationship, authenticate
+from py2neo.compat import integer, string, unicode
 from request_cache.middleware import RequestCache
 from xmodule.modulestore.django import modulestore
+from xmodule.partitions.partitions import UserPartition
 
 log = logging.getLogger(__name__)
 
@@ -17,9 +20,9 @@ class ModuleStoreSerializer(object):
     There will also be a "relationships" csv with information about
     which xblocks are children of each other.
     """
-    def __init__(self, csv_dir, neo4j_root):
-        self.csv_dir = csv_dir
-        self.neo4j_root = neo4j_root
+    def __init__(self):
+        # self.csv_dir = csv_dir
+        # self.neo4j_root = neo4j_root
 
         # caches field names for each block type
         self.field_names_by_block_type = {}
@@ -186,7 +189,7 @@ class ModuleStoreSerializer(object):
 
         fields['type'] = block_type
 
-        fields['type:LABEL'] = fields['type']
+        label = fields['type']
         del fields['type']
 
         if 'checklists' in fields:
@@ -197,7 +200,7 @@ class ModuleStoreSerializer(object):
         fields['run'] = course_key.run
         fields['course_key'] = unicode(course_key)
 
-        return fields, block_type
+        return fields, label
 
     def serialize_items(self, items, course_key):
         """
@@ -243,7 +246,7 @@ class Command(BaseCommand):
     a REST api)
     """
 
-    def add_arguments(self, parser):
+    def xadd_arguments(self, parser):
         parser.add_argument('--neo4j_root',
             action='store',
             dest='neo4j_root',
@@ -258,24 +261,58 @@ class Command(BaseCommand):
             help='where to dump csv files to'
         )
 
-    def handle(self, *args, **options):
-        """
-        Management command to dump modulestore data to csvs.
-        Also generates the command necessary to import those csvs into neo4j.
-        """
-        # TODO: switch this to use mkdtemp_clean.
-        # https://github.com/edx/edx-platform/blob/master/openedx/core/lib/tempdir.py#L9
-        # csv_dir = tempfile.mkdtemp(prefix="csvs_", dir="/tmp")
-        csv_dir = os.path.abspath(options['csv_dir'])
-        neo4j_root = os.path.abspath(options["neo4j_root"])
-        self.clear_csv_dir(csv_dir)
 
-        module_store_serializer = ModuleStoreSerializer(csv_dir, neo4j_root)
-        module_store_serializer.dump_to_csv()
-        log.info("Use the following command to import your csvs into neo4j")
-        log.info(self.generate_bulk_import_command(module_store_serializer))
-        # self.upload_to_s3(csv_dir)
-        # self.clear_csv_dir(csv_dir)
+
+    def handle(self, *args, **options):
+
+        mss = ModuleStoreSerializer()
+
+        ACCEPTABLE_TYPES = (integer, string, unicode, float, bool, tuple, list, set, frozenset)
+
+        graph = Graph(password="edx", bolt=True)
+        authenticate("localhost:7474", 'neo4j', 'edx')
+        graph.delete_all()
+
+        for course in mss.all_courses:
+            print course
+            location_to_node = {}
+            for item in modulestore().get_items(course.id):
+                fields, label = mss.serialize_item(item, course.id)
+
+                for k, v in fields.iteritems():
+                    try:
+                        fields[k] = coerce_types(v, ACCEPTABLE_TYPES)
+                    except TypeError:
+                        import ipdb; ipdb.set_trace()
+                        coerce_types(v, ACCEPTABLE_TYPES)
+                        raise
+
+                if not isinstance(label, ACCEPTABLE_TYPES):
+                    label = unicode(label)
+                try:
+                    node = Node(label, **fields)
+                except TypeError:
+                    print label
+                    print fields
+                    raise
+                location_to_node.update({item.location: node})
+
+            tx = graph.begin()
+            for item in modulestore().get_items(course.id):
+                if item.has_children:
+                    for child_loc in item.get_children():
+                        parent_node = location_to_node.get(item.location)
+                        child_node = location_to_node.get(child_loc.location)
+                        if parent_node is not None and child_node is not None:
+                            relationship = Relationship(parent_node, "PARENT_OF", child_node)
+                            tx.create(relationship)
+            tx.commit()
+
+
+
+
+
+
 
     def generate_bulk_import_command(self, module_store_serializer):
         """
@@ -325,3 +362,13 @@ def upload_to_s3(csv_dir, bucket):
 
         with open(full_filename, 'rb') as csv_file:
             key.set_contents_from_file(csv_file)
+
+def coerce_types(value, acceptable_types):
+    if isinstance(value, (tuple, list, set, frozenset)) and not isinstance(value, UserPartition):
+        for index, element in enumerate(value):
+            value[index] = unicode(element)
+
+    elif not isinstance(value, acceptable_types) or isinstance(value, UserPartition):
+        value = unicode(value)
+
+    return value
