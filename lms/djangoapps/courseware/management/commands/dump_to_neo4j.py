@@ -82,7 +82,7 @@ class Command(BaseCommand):
         print "deleting existing graph"
         graph.delete_all()
 
-        for course in mss.all_courses[2:3]:
+        for course in mss.all_courses:
             RequestCache.clear_request_cache()
             print course.id
             location_to_node = {}
