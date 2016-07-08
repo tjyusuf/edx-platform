@@ -93,26 +93,6 @@ class UserPreferenceModelTest(ModuleStoreTestCase):
         pref = UserPreference.get_value(user, 'testkey_none')
         self.assertIsNone(pref)
 
-    def test_get_all_preferences(self):
-        """Verifies behavior of get_all_preferences"""
-
-        user = UserFactory.create()
-
-        user_prefs = UserPreference.get_all_preferences(user)
-        self.assertEqual({}, user_prefs)
-
-        prefs = {'testkey': 'testvalue', 'testkey2': 'testvalue2'}
-        for key in prefs:
-            set_user_preference(user, key, prefs[key])
-
-        user2 = UserFactory.create()
-        set_user_preference(user2, 'testkey3', 'testvalue3')
-
-        user_prefs = UserPreference.get_all_preferences(user)
-        self.assertEqual(prefs, user_prefs)
-
-        self.assertNotIn('testkey3', user_prefs)
-
 
 class TestUserPreferenceEvents(UserSettingsEventTestMixin, TestCase):
     """
