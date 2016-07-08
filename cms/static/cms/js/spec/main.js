@@ -38,6 +38,7 @@
             'backbone': 'common/js/vendor/backbone',
             'backbone.associations': 'xmodule_js/common_static/js/vendor/backbone-associations-min',
             'backbone.paginator': 'common/js/vendor/backbone.paginator',
+            'backbone.validation': 'common/js/vendor/backbone-validation',
             'backbone-relational': 'xmodule_js/common_static/js/vendor/backbone-relational.min',
             'tinymce': 'xmodule_js/common_static/js/vendor/tinymce/js/tinymce/tinymce.full.min',
             'jquery.tinymce': 'xmodule_js/common_static/js/vendor/tinymce/js/tinymce/jquery.tinymce',
@@ -276,7 +277,11 @@
         'js/certificates/spec/views/certificate_details_spec',
         'js/certificates/spec/views/certificate_editor_spec',
         'js/certificates/spec/views/certificates_list_spec',
-        'js/certificates/spec/views/certificate_preview_spec'
+        'js/certificates/spec/views/certificate_preview_spec',
+        'js/programs/test/specs/auto_auth_model_spec',
+        'js/programs/test/specs/program_creator_spec',
+        'js/programs/test/specs/program_details_spec',
+        'js/programs/test/specs/program_list_spec'
     ];
 
     i = 0;

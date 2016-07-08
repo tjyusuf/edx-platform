@@ -30,6 +30,7 @@ var options = {
         {pattern: 'cms/**/*spec.js'},
         {pattern: 'coffee/spec/**/*spec.js'},
         {pattern: 'js/certificates/spec/**/*spec.js'},
+        {pattern: 'js/programs/test/specs/*spec.js'},
         {pattern: 'js/spec/**/*spec.js'}
     ],
 
