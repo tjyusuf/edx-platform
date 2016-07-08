@@ -8,8 +8,8 @@
         <label for="bulk-exception-upload" class="sr"><%- gettext('Choose CSV file') %></label>
         <input class="browse-file sr" id="bulk-exception-upload" />
         <div class="file-browse btn btn-primary">
-            <label for="browseBtn-white-list-exception" class="browse"><%- gettext("Browse") %></label>
-            <input class="file_field" id="browseBtn-white-list-exception" name="students_list" type="file" accept=".csv"/>
+            <label for="browseBtn-bulk-csv" class="browse"><%- gettext("Browse") %></label>
+            <input class="file_field" id="browseBtn-bulk-csv" name="students_list" type="file" accept=".csv"/>
         </div>
       </div>
       <div><button class="btn-blue upload-csv-button" type="submit"><%- gettext('Add to Exception List') %></button></div>
