@@ -3,8 +3,7 @@ define([
         'jquery',
         'underscore',
         'text!templates/programs/program_list.underscore',
-        'gettext',
-        'js/programs/shims/edx-icons'
+        'gettext'
     ],
     function ( Backbone, $, _, ListTpl ) {
         'use strict';
