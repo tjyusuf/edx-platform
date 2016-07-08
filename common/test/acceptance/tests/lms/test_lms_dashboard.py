@@ -52,33 +52,39 @@ class BaseLmsDashboardTest(UniqueCourseTest):
 
         self.username = "test_{uuid}".format(uuid=self.unique_id[0:6])
         self.email = "{user}@example.com".format(user=self.username)
+        
+        self.course_keys = {}
+        self.course_fixtures = {}
 
-        for value in self.courses.iteritems():
-            self.course_key = generate_course_key(
-                value["org"],
-                value["number"],
-                value["run"],
+        for key, value in self.courses.iteritems():
+            course_key = generate_course_key(
+                value['org'],
+                value['number'],
+                value['run'],
             )
 
-            self.course_fixture = CourseFixture(
-                value["org"],
-                value["number"],
-                value["run"],
-                value["display_name"],
+            course_fixture = CourseFixture(
+                value['org'],
+                value['number'],
+                value['run'],
+                value['display_name'],
             )
 
-            self.course_fixture.add_advanced_settings({
+            course_fixture.add_advanced_settings({
                 u"social_sharing_url": {u"value": "http://custom/course/url"}
             })
 
-            self.course_fixture.install()
+            course_fixture.install()
+            
+            self.course_keys[key] = course_key
+            self.course_fixtures[key] = course_fixture
 
             # Create the test user, register them for the course, and authenticate
             AutoAuthPage(
                 self.browser,
                 username=self.username,
                 email=self.email,
-                course_id=self.course_key
+                course_id=course_key
             ).visit()
 
         # Navigate the authenticated, enrolled user to the dashboard page and get testing!
