@@ -52,7 +52,7 @@ class BaseLmsDashboardTest(UniqueCourseTest):
 
         self.username = "test_{uuid}".format(uuid=self.unique_id[0:6])
         self.email = "{user}@example.com".format(user=self.username)
-        
+
         self.course_keys = {}
         self.course_fixtures = {}
 
@@ -75,7 +75,7 @@ class BaseLmsDashboardTest(UniqueCourseTest):
             })
 
             course_fixture.install()
-            
+
             self.course_keys[key] = course_key
             self.course_fixtures[key] = course_fixture
 
