@@ -138,7 +138,9 @@ define([
                 return {
                     name: gettext('confirm'),
                     title: gettext('Publish this program?'),
-                    body: gettext('After you publish this program, you cannot add or remove course codes or remove course runs.'),
+                    body: gettext(
+                        'After you publish this program, you cannot add or remove course codes or remove course runs.'
+                    ),
                     cta: {
                         cancel: gettext('Cancel'),
                         confirm: gettext('Publish')

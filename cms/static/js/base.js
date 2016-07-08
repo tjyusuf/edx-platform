@@ -2,7 +2,18 @@ require(["domReady", "jquery", "underscore", "gettext", "common/js/components/vi
         "common/js/components/views/feedback_prompt", "js/utils/date_utils",
         "js/utils/module", "js/utils/handle_iframe_binding", "edx-ui-toolkit/js/dropdown-menu/dropdown-menu-view", 
         "jquery.ui", "jquery.leanModal", "jquery.form", "jquery.smoothScroll"],
-    function(domReady, $, _, gettext, NotificationView, PromptView, DateUtils, ModuleUtils, IframeUtils, DropdownMenuView)
+    function(
+        domReady,
+        $,
+        _,
+        gettext,
+        NotificationView,
+        PromptView,
+        DateUtils,
+        ModuleUtils,
+        IframeUtils,
+        DropdownMenuView
+    )
 {
 
 var $body;
@@ -68,9 +79,11 @@ domReady(function() {
         $.ajaxSetup({ cache: false });
     }
 
+    //Initiate the edx tool kit dropdown menu
     var dropdownMenuView = new DropdownMenuView({
         el: '.js-header-user-menu'
-    }).postRender();
+    });
+    dropdownMenuView.postRender();
 });
 
 function smoothScrollLink(e) {
