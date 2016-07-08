@@ -35,7 +35,10 @@
 
       .icon {
         @include margin-right($baseline/4);
-        font-family: FontAwesome;
+      }
+
+      .fa{
+        font: normal normal normal 14px/1 FontAwesome;
       }
 
       &:hover {
