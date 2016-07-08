@@ -38,7 +38,7 @@
             'backbone': 'common/js/vendor/backbone',
             'backbone.associations': 'xmodule_js/common_static/js/vendor/backbone-associations-min',
             'backbone.paginator': 'common/js/vendor/backbone.paginator',
-            'backbone.validation': 'common/js/vendor/backbone-validation',
+            'backbone.validation': 'common/js/vendor/backbone-validation-min',
             'backbone-relational': 'xmodule_js/common_static/js/vendor/backbone-relational.min',
             'tinymce': 'xmodule_js/common_static/js/vendor/tinymce/js/tinymce/tinymce.full.min',
             'jquery.tinymce': 'xmodule_js/common_static/js/vendor/tinymce/js/tinymce/jquery.tinymce',
