@@ -74,7 +74,7 @@ class DjangoXBlockUserService(UserService):
             user_preferences = django_user.preferences.model.get_all_preferences(django_user.id)
             xblock_user.opt_attrs[ATTR_KEY_USER_PREFERENCES] = {
                 pref: user_preferences.get(pref)
-                for pref in USER_PREFERENCES_WHITE_LIST
+                for pref in USER_PREFERENCES_WHITE_LIST if pref in user_preferences
             }
         else:
             xblock_user.opt_attrs[ATTR_KEY_IS_AUTHENTICATED] = False

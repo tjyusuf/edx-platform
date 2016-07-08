@@ -8,6 +8,8 @@ from xblock_django.user_service import (
     ATTR_KEY_USER_ID,
     ATTR_KEY_USERNAME,
     ATTR_KEY_USER_IS_STAFF,
+    ATTR_KEY_USER_PREFERENCES,
+    USER_PREFERENCES_WHITE_LIST,
 )
 from student.models import anonymous_id_for_user
 from student.tests.factories import UserFactory, AnonymousUserFactory
@@ -42,6 +44,8 @@ class UserServiceTestCase(TestCase):
         self.assertEqual(xb_user.opt_attrs[ATTR_KEY_USERNAME], dj_user.username)
         self.assertEqual(xb_user.opt_attrs[ATTR_KEY_USER_ID], dj_user.id)
         self.assertFalse(xb_user.opt_attrs[ATTR_KEY_USER_IS_STAFF])
+        self.assertTrue(all(pref in USER_PREFERENCES_WHITE_LIST
+                            for pref in xb_user.opt_attrs[ATTR_KEY_USER_PREFERENCES]))
 
     def test_convert_anon_user(self):
         """
