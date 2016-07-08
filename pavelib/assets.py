@@ -648,6 +648,9 @@ def collect_assets(systems, settings, debug=None, collectstatic_log=None):
     `settings` is the Django settings module to use.
     `debug` and `collectstatic_log` are used for determining where to
        pipe collectstatic logging.
+
+       If both 'debug' and 'collecstatic_log' are passed, outputting to
+       a file takes precedence.
     """
 
     # unless specified, collectstatic (which can be very verbose) pipes to /dev/null
@@ -656,7 +659,7 @@ def collect_assets(systems, settings, debug=None, collectstatic_log=None):
         # pipe to console
         collectstatic_stdout_str = ""
     if collectstatic_log:
-        # pipe to specified file
+        # pipe to specified file, even if debug has also been passed in
         collectstatic_stdout_str = "> {output_file}".format(output_file=collectstatic_log)
 
     for sys in systems:
