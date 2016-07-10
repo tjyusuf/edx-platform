@@ -3061,8 +3061,6 @@ CREATE TABLE `programs_programsapiconfig` (
   `enable_student_dashboard` tinyint(1) NOT NULL,
   `changed_by_id` int(11) DEFAULT NULL,
   `cache_ttl` int(10) unsigned NOT NULL,
-  `authoring_app_css_path` varchar(255) NOT NULL,
-  `authoring_app_js_path` varchar(255) NOT NULL,
   `enable_studio_tab` tinyint(1) NOT NULL,
   `enable_certification` tinyint(1) NOT NULL,
   `max_retries` int(10) unsigned NOT NULL,
