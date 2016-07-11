@@ -1,0 +1,12 @@
+<%page expression_filter="h"/>
+<%! from django.utils.translation import ugettext as _ %>
+
+<div class="sequence hidden-content proctored-exam completed">
+  <h3>
+      The due date for this ${subsection_format} has passed
+  </h3>
+  <hr>
+  <p>
+      Because the due date has passed, this ${subsection_format} is no longer available.
+  </p>
+</div>
