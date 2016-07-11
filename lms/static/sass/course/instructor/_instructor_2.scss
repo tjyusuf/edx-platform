@@ -2355,35 +2355,43 @@ input[name="subject"] {
 .customBrowseBtn {
   margin: ($baseline/2) 0;
   display: inline-block;
+  
   .file-browse {
+    @include margin-left(-5px);
     position: relative;
     overflow: hidden;
     display: inline;
-    @include margin-left(-5px);
-    span.browse {
+    
+    .browse {
       @include button(simple, $uxpl-blue-base);
       @include margin-right($baseline);
       padding: 6px ($baseline/2);
       font-size: 12px;
       border-radius: 0 3px 3px 0;
     }
-    input.file_field {
-      @extend %cont-text-sr;
-      position: absolute;
+    
+    .file_field {
       @include right(0);
+      position: absolute;
+      z-index: 1;
       top: 0;
+      height: 28px; // To match bull browse button
       margin: 0;
       padding: 0;
       cursor: pointer;
     }
   }
-  & > span, & input[disabled] {
-    vertical-align: middle;
-  }
-  input[disabled] {
+  
+  #browseFile {
     @include border-radius(4px 0 0 4px);
-    @include padding(6px 6px 5px);
+    @include padding(23px 6px 5px);
+    position: relative;
+    z-index: 2;
+    display: inline-block;
+    width: 250px;
+    vertical-align: middle;
     border: 1px solid $lightGrey1;
+    background: $white;
     cursor: not-allowed;
   }
 }
