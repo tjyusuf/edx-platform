@@ -80,10 +80,10 @@ class CoursePagesTest(StudioCourseTest):
         self.pages = [
             clz(self.browser, self.course_info['org'], self.course_info['number'], self.course_info['run'])
             for clz in [
-                AssetIndexPage,
                 CourseUpdatesPage,
                 PagesPage, ExportCoursePage, ImportCoursePage, CourseTeamPage, CourseOutlinePage, SettingsPage,
-                AdvancedSettingsPage, GradingPage, TextbookUploadPage
+                AdvancedSettingsPage, GradingPage, TextbookUploadPage,
+                AssetIndexPage,
             ]
         ]
 
