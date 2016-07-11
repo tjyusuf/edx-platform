@@ -93,7 +93,7 @@ from openedx.core.djangoapps.course_groups.partition_scheme import get_cohorted_
     <form id="student-auto-enroll-form" method="post" action="${ section_data['upload_student_csv_button_url'] }" enctype="multipart/form-data">
       <div class="customBrowseBtn">
         <label for="browseFile" class="sr">${_("Upload a CSV for bulk enrollment")}</label>
-        <input disabled="disabled" id="browseFile" placeholder="choose file" />
+        <input disabled="disabled" id="browseFile" class="sr" placeholder="choose file" />
         <div class="file-browse btn btn-primary">
             <span class="browse"> Browse </span>
             <label for="browseBtn-auto-enroll" class="sr">${_("Upload a CSV for bulk enrollment")}</label>
