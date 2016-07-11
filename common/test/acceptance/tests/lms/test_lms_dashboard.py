@@ -53,7 +53,7 @@ class BaseLmsDashboardTest(UniqueCourseTest):
         self.username = "test_{uuid}".format(uuid=self.unique_id[0:6])
         self.email = "{user}@example.com".format(user=self.username)
 
-        for key, value in self.courses.iteritems():
+        for value in self.courses.iteritems():
             course_key = generate_course_key(
                 value['org'],
                 value['number'],
