@@ -641,7 +641,7 @@ def restart_django_servers():
     ))
 
 
-def collect_assets(systems, settings, debug=None, collectstatic_log=None):
+def collect_assets(systems, settings, collectstatic_log="/dev/null"):
     """
     Collect static assets, including Django pipeline processing.
     `systems` is a list of systems (e.g. 'lms' or 'studio' or both)
@@ -654,11 +654,9 @@ def collect_assets(systems, settings, debug=None, collectstatic_log=None):
     """
 
     # unless specified, collectstatic (which can be very verbose) pipes to /dev/null
-    collectstatic_stdout_str = "> /dev/null"
-    if debug:
-        # pipe to console
+    if collectstatic_log is None:
         collectstatic_stdout_str = ""
-    if collectstatic_log:
+    else:
         # pipe to specified file, even if debug has also been passed in
         collectstatic_stdout_str = "> {output_file}".format(output_file=collectstatic_log)
 
@@ -795,7 +793,13 @@ def update_assets(args):
     execute_compile_sass(args)
 
     if args.collect:
-        collect_assets(args.system, args.settings, debug=args.debug, collectstatic_log=args.collect_log_file)
+        collect_log_file = args.collect_log_file
+
+        # run collectstatic in debug mode if update_assets is in debug mode and no log location is specified
+        if args.debug and not collect_log_file:
+            collect_log_file = None
+
+        collect_assets(args.system, args.settings, collectstatic_log=collect_log_file)
 
     if args.watch:
         call_task(
