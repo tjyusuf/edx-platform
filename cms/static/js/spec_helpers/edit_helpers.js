@@ -76,6 +76,7 @@ define(["jquery", "underscore", "edx-ui-toolkit/js/utils/spec-helpers/ajax-helpe
             TemplateHelpers.installTemplate('add-xblock-component-button');
             TemplateHelpers.installTemplate('add-xblock-component-menu');
             TemplateHelpers.installTemplate('add-xblock-component-menu-problem');
+            TemplateHelpers.installTemplate('add-xblock-component-support-level');
 
             // Add templates needed by the edit XBlock modal
             TemplateHelpers.installTemplate('edit-xblock-modal');

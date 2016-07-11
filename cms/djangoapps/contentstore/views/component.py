@@ -50,7 +50,8 @@ CONTAINER_TEMPLATES = [
     "basic-modal", "modal-button", "edit-xblock-modal",
     "editor-mode-button", "upload-dialog",
     "add-xblock-component", "add-xblock-component-button", "add-xblock-component-menu",
-    "add-xblock-component-menu-problem", "xblock-string-field-editor", "publish-xblock", "publish-history",
+    "add-xblock-component-support-level", "add-xblock-component-menu-problem",
+    "xblock-string-field-editor", "publish-xblock", "publish-history",
     "unit-outline", "container-message", "license-selector",
 ]
 
@@ -327,7 +328,8 @@ def get_component_templates(courselike, library=False):
         component_templates.append({
             "type": category,
             "templates": templates_for_category,
-            "display_name": component_display_names[category]
+            "display_name": component_display_names[category],
+            "allow_unsupported_xblocks": allow_unsupported
         })
 
     # Libraries do not support advanced components at this time.
@@ -339,7 +341,12 @@ def get_component_templates(courselike, library=False):
     # are the names of the modules in ADVANCED_COMPONENT_TYPES that should be
     # enabled for the course.
     course_advanced_keys = courselike.advanced_modules
-    advanced_component_templates = {"type": "advanced", "templates": [], "display_name": _("Advanced")}
+    advanced_component_templates = {
+        "type": "advanced",
+        "templates": [],
+        "display_name": _("Advanced"),
+        "allow_unsupported_xblocks": allow_unsupported
+    }
     advanced_component_types = _advanced_component_types(allow_unsupported)
     # Set component types according to course policy file
     if isinstance(course_advanced_keys, list):

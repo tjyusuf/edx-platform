@@ -180,6 +180,26 @@
         display: inline-block;
       }
     }
+
+    .support-documentation {
+      float: right;
+      @include margin($baseline, 0, ($baseline/2), ($baseline/2));
+
+      .support-documentation-level {
+        padding-right: ($baseline/2);
+      }
+    }
+
+    .support-level {
+      padding-right: ($baseline/2);
+    }
+
+    .icon.supported {
+      color: $primary-accent;
+    }
+    .icon.unsupported {
+      color: $primary-dark;
+    }
   }
 
   // individual menus

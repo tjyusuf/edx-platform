@@ -10,7 +10,8 @@ define(["backbone"], function (Backbone) {
             // category (may or may not match "type")
             // boilerplate_name (may be null)
             // is_common (only used for problems)
-            templates: []
+            templates: [],
+            allow_unsupported_xblocks: false
         },
         parse: function (response) {
             // Returns true only for templates that both have no boilerplate and are of
@@ -24,6 +25,7 @@ define(["backbone"], function (Backbone) {
             this.type = response.type;
             this.templates = response.templates;
             this.display_name = response.display_name;
+            this.allow_unsupported_xblocks = response.allow_unsupported_xblocks;
 
             // Sort the templates.
             this.templates.sort(function (a, b) {

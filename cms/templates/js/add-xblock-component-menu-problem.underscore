@@ -20,20 +20,16 @@
                     <% if (!templates[i].boilerplate_name) { %>
                     <li class="editor-md empty">
                         <button type="button" class="button-component" data-category="<%- templates[i].category %>">
+                            <%= HtmlUtils.HTML(support_template({support_level: templates[i].support_level})) %>
                             <span class="name"><%- templates[i].display_name %></span>
-                            <% if (templates[i].support_level !== "fs"){ %>
-                                <span class="support">(<%- templates[i].support_level %>)</span>
-                            <% } %>
                         </button>
                     </li>
                     <% } else { %>
                     <li class="editor-md">
                         <button type="button" class="button-component" data-category="<%- templates[i].category %>"
                            data-boilerplate="<%- templates[i].boilerplate_name %>">
+                            <%= HtmlUtils.HTML(support_template({support_level: templates[i].support_level})) %>
                             <span class="name"><%- templates[i].display_name %></span>
-                            <% if (templates[i].support_level !== "fs"){ %>
-                                <span class="support">(<%- templates[i].support_level %>)</span>
-                            <% } %>
                         </button>
                     </li>
                     <% } %>
@@ -48,10 +44,8 @@
                 <li class="editor-manual">
                     <button type="button" class="button-component" data-category="<%- templates[i].category %>"
                        data-boilerplate="<%- templates[i].boilerplate_name %>">
+                        <%= HtmlUtils.HTML(support_template({support_level: templates[i].support_level})) %>
                         <span class="name"><%- templates[i].display_name %></span>
-                        <% if (templates[i].support_level !== "fs"){ %>
-                            <span class="support">(<%- templates[i].support_level %>)</span>
-                        <% } %>
                     </button>
                 </li>
                 <% } %>
@@ -59,4 +53,21 @@
         </ul>
     </div>
     <button class="cancel-button" data-type="<%- type %>"><%- gettext("Cancel") %></button>
+    <span class="support-documentation">
+        <a class="support-documentation-level" href="http://edx.readthedocs.io/projects/edx-partner-course-staff/en/latest/exercises_tools/create_exercises_and_tools.html#id3" target="_blank"><%- gettext("edX Support:") %></a>
+        <span class="support-documentation-level">
+            <span class="icon fa fa-star supported" aria-hidden="true"></span>
+            <span><%- gettext('Supported') %></span>
+        </span>
+        <span class="support-documentation-level">
+            <span class="icon fa fa-circle-o supported" aria-hidden="true"></span>
+            <span><%- gettext('Provisional') %></span>
+        </span>
+        <% if (allow_unsupported_xblocks) { %>
+        <span class="support-documentation-level">
+            <span class="icon fa fa-flag unsupported" aria-hidden="true"></span>
+            <span><%- gettext('Not Supported') %></span>
+        </span>
+        <% } %>
+    </span>
 </div>

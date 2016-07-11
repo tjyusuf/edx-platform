@@ -1,0 +1,10 @@
+<% if (support_level === "ps"){ %>
+    <span class="icon fa fa-circle-o support-level supported" aria-hidden="true"></span>
+    <span class="sr"><%- gettext('Provisionally Supported') %></span>
+<% } else if (support_level === "us"){ %>
+    <span class="icon fa fa-flag support-level unsupported" aria-hidden="true"></span>
+    <span class="sr"><%- gettext('Not Supported') %></span>
+<% } else { %>
+    <span class="icon fa fa-star support-level supported" aria-hidden="true"></span>
+    <span class="sr"><%- gettext('Fully Supported') %></span>
+<% } %>
