@@ -53,7 +53,10 @@ class BaseLmsDashboardTest(UniqueCourseTest):
         self.username = "test_{uuid}".format(uuid=self.unique_id[0:6])
         self.email = "{user}@example.com".format(user=self.username)
 
-        for value in self.courses.iteritems():
+        self.course_keys = {}
+        self.course_fixtures = {}
+
+        for key, value in self.courses.iteritems():
             course_key = generate_course_key(
                 value['org'],
                 value['number'],
@@ -72,6 +75,9 @@ class BaseLmsDashboardTest(UniqueCourseTest):
             })
 
             course_fixture.install()
+            
+            self.course_keys[key] = course_key
+            self.course_fixtures[key] = course_fixture
 
             # Create the test user, register them for the course, and authenticate
             AutoAuthPage(
