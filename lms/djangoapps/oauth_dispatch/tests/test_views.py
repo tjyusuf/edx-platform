@@ -331,28 +331,33 @@ class TestRevokeTokenView(_DispatchingViewTestCase):  # pylint: disable=abstract
 
     def setUp(self):
         super(TestRevokeTokenView, self).setUp()
-        response = self.client.post(self.access_token_url, self.access_token_post_body())
+        response = self.client.post(self.access_token_url, self.access_token_post_body_with_password())
         access_token_data = json.loads(response.content)
         self.access_token = access_token_data['access_token']
         self.refresh_token = access_token_data['refresh_token']
 
-    def access_token_post_body(self, refresh_token=None):
+    def access_token_post_body_with_password(self):
         """
-        Returns a dictionary to be used as the body of the access_token POST request
+        Returns a dictionary to be used as the body of the access_token
+        POST request with 'password' grant
         """
-        if refresh_token:
-            return {
-                'client_id': self.dot_app.client_id,
-                'grant_type': 'refresh_token',
-                'refresh_token': refresh_token,
-            }
-        else:
-            return {
-                'client_id': self.dot_app.client_id,
-                'grant_type': 'password',
-                'username': self.user.username,
-                'password': 'test',
-            }
+        return {
+            'client_id': self.dot_app.client_id,
+            'grant_type': 'password',
+            'username': self.user.username,
+            'password': 'test',
+        }
+
+    def access_token_post_body_with_refresh_token(self, refresh_token):
+        """
+        Returns a dictionary to be used as the body of the access_token
+        POST request with 'refresh_token' grant
+        """
+        return {
+            'client_id': self.dot_app.client_id,
+            'grant_type': 'refresh_token',
+            'refresh_token': refresh_token,
+        }
 
     def revoke_token_post_body(self, token):
         """
@@ -372,18 +377,39 @@ class TestRevokeTokenView(_DispatchingViewTestCase):  # pylint: disable=abstract
             HTTP_AUTHORIZATION="Bearer {0}".format(self.access_token)
         )
 
+    def _assert_access_token_validated(self):
+        """
+        Asserts that oauth assigned access_token is valid and usable
+        """
+        self.assertEqual(self.login_with_access_token().status_code, 204)
+
+    def _assert_access_token_invalidated(self):
+        """
+        Asserts that oauth assigned access_token is not valid
+        """
+        self.assertEqual(self.login_with_access_token().status_code, 401)
+
+    def _assert_refresh_token_invalidated(self):
+        """
+        Asserts that oauth assigned refresh_token is not valid
+        """
+        response = self.client.post(
+            self.access_token_url,
+            self.access_token_post_body_with_refresh_token(self.refresh_token)
+        )
+        self.assertEqual(response.status_code, 401)
+
     def verify_revoke_token(self, token):
         """
         Verifies access of token before and after revoking
         """
-        self.assertEqual(self.login_with_access_token().status_code, 204)
+        self._assert_access_token_validated()
 
         response = self.client.post(self.revoke_token_url, self.revoke_token_post_body(token))
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(self.login_with_access_token().status_code, 401)
-        response = self.client.post(self.access_token_url, self.access_token_post_body(self.refresh_token))
-        self.assertEqual(response.status_code, 401)
+        self._assert_access_token_invalidated()
+        self._assert_refresh_token_invalidated()
 
     def test_revoke_refresh_token_dot(self):
         """
