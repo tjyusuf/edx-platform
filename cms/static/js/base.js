@@ -1,7 +1,19 @@
-require(["domReady", "jquery", "underscore", "gettext", "common/js/components/views/feedback_notification",
-        "common/js/components/views/feedback_prompt", "js/utils/date_utils",
-        "js/utils/module", "js/utils/handle_iframe_binding", "edx-ui-toolkit/js/dropdown-menu/dropdown-menu-view", 
-        "jquery.ui", "jquery.leanModal", "jquery.form", "jquery.smoothScroll"],
+require([
+    "domReady",
+    "jquery",
+    "underscore",
+    "gettext",
+    "common/js/components/views/feedback_notification",
+    "common/js/components/views/feedback_prompt",
+    "js/utils/date_utils",
+    "js/utils/module",
+    "js/utils/handle_iframe_binding",
+    "edx-ui-toolkit/js/dropdown-menu/dropdown-menu-view", 
+    "jquery.ui",
+    "jquery.leanModal",
+    "jquery.form",
+    "jquery.smoothScroll"
+    ],
     function(
         domReady,
         $,
