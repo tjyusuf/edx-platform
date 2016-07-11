@@ -473,6 +473,7 @@ class CoursewareIndex(View):
             section_context['next_url'] = _compute_section_url(next_of_active_section, 'first')
         # sections can hide data that masquerading staff should see when debugging issues with specific students
         section_context['specific_masquerade'] = self._is_masquerading_as_specific_student()
+        section_context['staff_access'] = self.effective_user.is_staff
         return section_context
 
     def _handle_unexpected_error(self):

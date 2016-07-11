@@ -9,6 +9,7 @@ import logging
 from pkg_resources import resource_string
 
 from lxml import etree
+from milestones import api as milestones_api
 from xblock.core import XBlock
 from xblock.fields import Integer, Scope, Boolean, String
 from xblock.fragment import Fragment
@@ -252,6 +253,9 @@ class SequenceModule(SequenceFields, ProctoringFields, XModule):
             'next_url': context.get('next_url'),
             'prev_url': context.get('prev_url'),
             'override_hidden_exam': masquerading and special_exam_html is not None,
+            'gated': milestones_api.get_course_content_milestones(
+                self.course_id, self.location, 'requires'
+            ) and context.get('staff_access', False),
         }
 
         fragment.add_content(self.system.render_template("seq_module.html", params))
