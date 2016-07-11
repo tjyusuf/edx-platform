@@ -1,0 +1,21 @@
+// studio - base styling
+// ====================
+html {
+  height: 102%; // force scrollbar to prevent jump when scroll appears, cannot use overflow because it breaks drag
+}
+
+body {
+  min-width: $fg-min-width;
+  background: $gray-l5;
+  color: $gray-d2;
+}
+
+
+// removing the outline on any element that we make programmatically focusable
+[tabindex="-1"] {
+    outline: none;
+}
+
+footer.primary{
+  font-size: font-size(x-small);
+}

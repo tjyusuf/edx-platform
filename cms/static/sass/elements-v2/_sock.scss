@@ -10,7 +10,6 @@
 
   .wrapper-inner {
     @include linear-gradient($gray-d3 0%, $gray-d3 98%, $black 100%);
-    @extend %ui-depth0;
     display: none;
     width: 100% !important;
     border-bottom: 1px solid $white;
@@ -51,7 +50,6 @@
   // sock - additional help
   .sock {
     @include clearfix();
-    @extend %t-copy-sub2;
     max-width: $fg-max-width;
     min-width: $fg-min-width;
     width: flex-grid(12);
@@ -91,14 +89,10 @@
               vertical-align: middle;
               @include margin-right($baseline/4);
             }
-
-            &:hover, &:active {
-
-            }
           }
 
           .tip {
-            @extend %cont-text-sr;
+            @extend .sr-only;
           }
         }
 
