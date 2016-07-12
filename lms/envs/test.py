@@ -381,6 +381,22 @@ FILE_UPLOAD_HANDLERS = (
     'django.core.files.uploadhandler.TemporaryFileUploadHandler',
 )
 
+###################### Grade Downloads ######################
+# When tests run concurrently, make sure that they do not
+# interfere with each other when creating or removing temp files.
+GRADES_DOWNLOAD = {
+    'STORAGE_TYPE': 'localfs',
+    'BUCKET': 'edx-grades',
+    'ROOT_PATH': '/tmp/edx-s3-{}/grades'.format(THIS_UUID),
+}
+
+FINANCIAL_REPORTS = {
+    'STORAGE_TYPE': 'localfs',
+    'BUCKET': 'edx-financial-reports',
+    'ROOT_PATH': '/tmp/edx-s3-{}/financial_reports'.format(THIS_UUID),
+}
+
+
 ########################### Server Ports ###################################
 
 # These ports are carefully chosen so that if the browser needs to
