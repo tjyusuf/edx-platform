@@ -37,11 +37,7 @@ class _DispatchingView(View):
         """
         Returns the appropriate adapter based on the OAuth client linked to the request.
         """
-        dot_application = dot_models.Application.objects.filter(client_id=self._get_client_id(request))
-        if dot_application.exists():
-            if isinstance(self, RevokeTokenView):
-                request.POST = request.POST.copy()  # Make a mutable copy of the POST parameters.
-                request.POST['client_secret'] = dot_application[0].client_secret
+        if dot_models.Application.objects.filter(client_id=self._get_client_id(request)).exists():
             return self.dot_adapter
         else:
             return self.dop_adapter
