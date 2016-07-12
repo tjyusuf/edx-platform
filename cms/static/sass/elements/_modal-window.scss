@@ -669,14 +669,28 @@
       }
     }
 
-    .edit-content-visibility {
+    .edit-staff-lock {
       margin-bottom: $baseline;
     }
 
-    .edit-settings-timed-examination, .edit-verification-access {
+    // UI: staff lock section
+    .edit-staff-lock, .edit-settings-timed-examination, .edit-verification-access {
 
       .checkbox-cosmetic .input-checkbox {
         @extend %cont-text-sr;
+
+        // CASE: unchecked
+        ~ .tip-warning {
+          display: block;
+        }
+
+        // CASE: checked
+        &:checked {
+
+          ~ .tip-warning {
+            display: none;
+          }
+        }
       }
 
       // needed to override poorly scoped margin-bottom on any label element in a view (from _forms.scss)

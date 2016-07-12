@@ -22,23 +22,11 @@
         </li>
     </ul>
 
-    <% if (visibility == 'staff_only' && !ancestorLocked) { %>
+    <% if (hasExplicitStaffLock && !ancestorLocked) { %>
         <p class="tip tip-warning">
-          <% if (xblockInfo.isVertical()) { %>
-            <%- gettext('If the unit was previously published and released to students, any changes you made to the unit when it was hidden will now be visible to students.') %>
-          <% } else { %>
             <% var message = gettext('If you make this %(xblockType)s visible to students, students will be able to see its content after the release date has passed and you have published the unit.'); %>
             <%- interpolate(message, { xblockType: xblockType }, true) %>
-          <% } %>
-        </p>
-
-        <p class="tip tip-warning">
-          <% if (xblockInfo.isChapter()) { %>
-            <%- gettext('Any subsections or units that are explicitly hidden from students will remain hidden after you clear this option for the section.') %>
-          <% } %>
-          <% if (xblockInfo.isSequential()) { %>
             <%- gettext('Any units that are explicitly hidden from students will remain hidden after you clear this option for the subsection.') %>
-          <% } %>
         </p>
     <% } %>
 </div>

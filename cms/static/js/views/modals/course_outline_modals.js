@@ -14,8 +14,8 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
 ) {
     'use strict';
     var CourseOutlineXBlockModal, SettingsXBlockModal, PublishXBlockModal, AbstractEditor, BaseDateEditor,
-        ReleaseDateEditor, DueDateEditor, GradingEditor, PublishEditor, ContentVisibilityEditor,
-        VerificationAccessEditor, TimedExaminationPreferenceEditor, AccessEditor;
+        ReleaseDateEditor, DueDateEditor, GradingEditor, PublishEditor, AbstractVisibilityEditor, StaffLockEditor,
+        ContentVisibilityEditor, VerificationAccessEditor, TimedExaminationPreferenceEditor, AccessEditor;
 
     CourseOutlineXBlockModal = BaseModal.extend({
         events : _.extend({}, BaseModal.prototype.events, {
@@ -592,7 +592,62 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
         }
     });
 
-    ContentVisibilityEditor = AbstractEditor.extend({
+    AbstractVisibilityEditor = AbstractEditor.extend({
+        afterRender: function () {
+            AbstractEditor.prototype.afterRender.call(this);
+        },
+
+        isModelLocked: function() {
+            return this.model.get('has_explicit_staff_lock');
+        },
+
+        isAncestorLocked: function() {
+            return this.model.get('ancestor_has_staff_lock');
+        },
+
+        getContext: function () {
+            return {
+                hasExplicitStaffLock: this.isModelLocked(),
+                ancestorLocked: this.isAncestorLocked()
+            };
+        }
+    });
+
+    StaffLockEditor = AbstractVisibilityEditor.extend({
+        templateName: 'staff-lock-editor',
+        className: 'edit-staff-lock',
+        afterRender: function () {
+            AbstractVisibilityEditor.prototype.afterRender.call(this);
+            this.setLock(this.isModelLocked());
+        },
+
+        setLock: function(value) {
+            this.$('#staff_lock').prop('checked', value);
+        },
+
+        isLocked: function() {
+            return this.$('#staff_lock').is(':checked');
+        },
+
+        hasChanges: function() {
+            return this.isModelLocked() !== this.isLocked();
+        },
+
+        getRequestData: function() {
+            if (this.hasChanges()) {
+                return {
+                    publish: 'republish',
+                    metadata: {
+                        visible_to_staff_only: this.isLocked() ? true : null
+                    }
+                };
+            } else {
+                return {};
+            }
+        },
+    });
+
+    ContentVisibilityEditor = AbstractVisibilityEditor.extend({
         templateName: 'content-visibility-editor',
         className: 'edit-content-visibility',
         events: {
@@ -600,23 +655,17 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
         },
 
         modelVisibility: function() {
-            if (this.model.get('visibility')) {
-                return this.model.get('visibility');
-            }
-            else if (this.model.get('has_explicit_staff_lock')) {
+            if (this.model.get('has_explicit_staff_lock')) {
                 return 'staff_only';
-            }
-            else {
+            } else if (this.model.get('hide_after_due')) {
+                return 'hide_after_due';
+            } else {
                 return 'visible';
             }
         },
 
-        isAncestorLocked: function() {
-            return this.model.get('ancestor_has_staff_lock');
-        },
-
         afterRender: function () {
-            AbstractEditor.prototype.afterRender.call(this);
+            AbstractVisibilityEditor.prototype.afterRender.call(this);
             this.setVisibility(this.modelVisibility());
             this.$('input[name=content-visibility]:checked').change();
         },
@@ -651,14 +700,16 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
         getRequestData: function() {
             if (this.hasChanges()) {
                 var metadata = {};
-                // TODO: as part of TNL-4904, un-comment the below content_visibility lines
                 if (this.currentVisibility() === 'staff_only') {
                     metadata.visible_to_staff_only = true;
-                    // metadata.content_visibility = null;
+                    metadata.hide_after_due = false;
                 }
-                else {
-                    metadata.visible_to_staff_only = null; // is false better here?
-                    // metadata.content_visibility = this.currentVisibility();
+                else if (this.currentVisibility() === 'hide_after_due') {
+                    metadata.visible_to_staff_only = false;
+                    metadata.hide_after_due = true;
+                } else {
+                    metadata.visible_to_staff_only = false;
+                    metadata.hide_after_due = false;
                 }
 
                 return {
@@ -672,10 +723,11 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
         },
 
         getContext: function () {
-            return {
-                visibility: this.modelVisibility(),
-                ancestorLocked: this.isAncestorLocked()
-            };
+            return $.extend(
+                {},
+                AbstractVisibilityEditor.prototype.getContext.call(this),
+                { hide_after_due: this.modelVisibility() === 'hide_after_due'}
+            );
         }
     });
 
@@ -792,39 +844,45 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
         },
 
         getEditModal: function (xblockInfo, options) {
+
+            var tabs = [];
             var editors = [];
-            var tabs = [
-                {
-                    name: 'basic',
-                    displayName: gettext('Basic'),
-                    editors: []
-                },
-                {
-                    name: 'advanced',
-                    displayName: gettext('Advanced'),
-                    editors: [ContentVisibilityEditor]
-                }
-            ];
-
-            if (xblockInfo.isChapter()) {
-                tabs[0].editors = [ReleaseDateEditor];
-            } else if (xblockInfo.isSequential()) {
-                tabs[0].editors = [ReleaseDateEditor, GradingEditor, DueDateEditor];
-
-                if (options.enable_proctored_exams || options.enable_timed_exams) {
-                    tabs[1].editors.push(TimedExaminationPreferenceEditor);
-                }
-
-                if (typeof(xblockInfo.get('is_prereq')) !== 'undefined') {
-                    tabs[1].editors.push(AccessEditor);
-                }
-            } else if (xblockInfo.isVertical()) {
-                editors = [ContentVisibilityEditor];
+            if (xblockInfo.isVertical()) {
+                editors = [StaffLockEditor];
 
                 if (xblockInfo.hasVerifiedCheckpoints()) {
                     editors.push(VerificationAccessEditor);
                 }
+            } else {
+                tabs = [
+                    {
+                        name: 'basic',
+                        displayName: gettext('Basic'),
+                        editors: []
+                    },
+                    {
+                        name: 'advanced',
+                        displayName: gettext('Advanced'),
+                        editors: []
+                    }
+                ];
+                if (xblockInfo.isChapter()) {
+                    tabs[0].editors = [ReleaseDateEditor];
+                    tabs[1].editors = [StaffLockEditor];
+                } else if (xblockInfo.isSequential()) {
+                    tabs[0].editors = [ReleaseDateEditor, GradingEditor, DueDateEditor];
+                    tabs[1].editors = [ContentVisibilityEditor];
+
+                    if (options.enable_proctored_exams || options.enable_timed_exams) {
+                        tabs[1].editors.push(TimedExaminationPreferenceEditor);
+                    }
+
+                    if (typeof(xblockInfo.get('is_prereq')) !== 'undefined') {
+                        tabs[1].editors.push(AccessEditor);
+                    }
+                }
             }
+
             /* globals course */
             if (course.get('self_paced')) {
                 editors = _.without(editors, ReleaseDateEditor, DueDateEditor);
@@ -832,14 +890,9 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
                     tab.editors = _.without(tab.editors, ReleaseDateEditor, DueDateEditor);
                 });
             }
-            // if only advanced editors exist, no tabs
-            if (tabs[0].editors.length === 0) {
-                editors = tabs[1].editors;
-                tabs = [];
-            }
 
             return new SettingsXBlockModal($.extend({
-                tabs: editors !== [] ? tabs : [],
+                tabs: tabs,
                 editors: editors,
                 model: xblockInfo
             }, options));
