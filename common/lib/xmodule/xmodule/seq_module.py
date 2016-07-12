@@ -239,9 +239,19 @@ class SequenceModule(SequenceFields, ProctoringFields, XModule):
         """
         return (
             self.runtime.user_is_staff or
-            not self.due or
-            not self.hide_after_due or
-            datetime.now(UTC()) < self.due
+            self.is_content_visible(self.due, self.hide_after_due)
+        )
+
+    @classmethod
+    def is_content_visible(cls, due, hide_after_due):
+        """
+        Returns whether the runtime user can view the content
+        of this sequential.
+        """
+        return (
+            not due or
+            not hide_after_due or
+            datetime.now(UTC()) < due
         )
 
     def _student_view(self, context, banner_text=None):
