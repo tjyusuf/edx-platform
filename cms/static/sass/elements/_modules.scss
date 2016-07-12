@@ -185,7 +185,17 @@
       float: right;
       @include margin($baseline, 0, ($baseline/2), ($baseline/2));
 
-      .support-documentation-level {
+      span.support-documentation-level {
+        padding-right: ($baseline/2);
+      }
+
+      a.support-documentation-level {
+        // Override JQuery ui-widget-content link color (black) with our usual link color and hover action.
+        color: $blue;
+        &:hover {
+          color: $orange-d1;
+        }
+
         padding-right: ($baseline/2);
       }
     }
@@ -193,13 +203,14 @@
     .support-level {
       padding-right: ($baseline/2);
     }
-
     .icon.supported {
       color: $primary-accent;
     }
     .icon.unsupported {
       color: $primary-dark;
     }
+
+
   }
 
   // individual menus
