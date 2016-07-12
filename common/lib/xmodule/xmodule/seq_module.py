@@ -181,13 +181,14 @@ class SequenceModule(SequenceFields, ProctoringFields, XModule):
     def student_view(self, context):
         context = context or {}
         self._capture_basic_metrics()
-        banner_text, fragment = self._special_exam_student_view(context)
-        if not banner_text and not fragment:
-            banner_text, fragment = self._hidden_content_student_view(context)
-        if not fragment:
-            fragment = self._student_view(context, banner_text)
 
-        return fragment
+        banner_text, special_html = self._special_exam_student_view(context) or self._hidden_content_student_view(context)
+        masquerading_as_specific_student = context.get('specific_masquerade', False)
+
+        if special_html and not masquerading_as_specific_student:
+            return Fragment(special_html)
+        else:
+            return self._student_view(context, banner_text)
 
     def _special_exam_student_view(self, context):
         """
@@ -195,17 +196,11 @@ class SequenceModule(SequenceFields, ProctoringFields, XModule):
         a banner_text or the fragment to display depending on whether
         staff is masquerading.
         """
-        banner_text = None
-        fragment = None
-        masquerading_as_specific_student = context.get('specific_masquerade', False)
         if self.is_time_limited:
             special_exam_html = self._time_limited_student_view(context)
             if special_exam_html:
-                if masquerading_as_specific_student:
-                    banner_text = _("This exam is hidden from the learner.")
-                else:
-                    fragment = Fragment(special_exam_html)
-        return banner_text, fragment
+                banner_text = _("This exam is hidden from the learner.")
+                return banner_text, special_exam_html
 
     def _hidden_content_student_view(self, context):
         """
@@ -213,24 +208,18 @@ class SequenceModule(SequenceFields, ProctoringFields, XModule):
         If so, returns a banner_text or the fragment to display depending
         on whether staff is masquerading.
         """
-        banner_text = None
-        fragment = None
-        masquerading_as_specific_student = context.get('specific_masquerade', False)
         if not self._can_view_content():
-            if masquerading_as_specific_student:
-                # Translators: subsection_format refers to the assignment
-                # type of the subsection, such as Homework, Lab, Exam, etc.
-                banner_text = _(
-                    "Because the due date has passed, "
-                    "this {subsection_format} is hidden from the learner."
-                ).format(subsection_format=self.format)  # pylint: disable=no-member
-            else:
-                hidden_content_html = self.system.render_template(
-                    'hidden_content.html',
-                    {'subsection_format': self.format}  # pylint: disable=no-member
-                )
-                fragment = Fragment(hidden_content_html)
-        return banner_text, fragment
+            # Translators: subsection_format refers to the assignment
+            # type of the subsection, such as Homework, Lab, Exam, etc.
+            banner_text = _(
+                "Because the due date has passed, "
+                "this {subsection_format} is hidden from the learner."
+            ).format(subsection_format=self.format)  # pylint: disable=no-member
+            hidden_content_html = self.system.render_template(
+                'hidden_content.html',
+                {'subsection_format': self.format}  # pylint: disable=no-member
+            )
+            return banner_text, hidden_content_html
 
     def _can_view_content(self):
         """
