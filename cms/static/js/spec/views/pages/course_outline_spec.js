@@ -238,8 +238,8 @@ define(["jquery", "edx-ui-toolkit/js/utils/spec-helpers/ajax-helpers", "common/j
                     'course-outline', 'xblock-string-field-editor', 'modal-button',
                     'basic-modal', 'course-outline-modal', 'release-date-editor',
                     'due-date-editor', 'grading-editor', 'publish-editor',
-                    'content-visibility-editor', 'settings-modal-tabs', 'timed-examination-preference-editor',
-                    'access-editor'
+                    'staff-lock-editor','content-visibility-editor', 'settings-modal-tabs',
+                    'timed-examination-preference-editor', 'access-editor'
                 ]);
                 appendSetFixtures(mockOutlinePage);
                 mockCourseJSON = createMockCourseJSON({}, [
@@ -545,7 +545,7 @@ define(["jquery", "edx-ui-toolkit/js/utils/spec-helpers/ajax-helpers", "common/j
 
                     // Staff lock controls are always visible on the advanced tab
                     selectAdvancedSettings();
-                    expect($(".content-visibility")).toExist();
+                    expect($("#staff_lock")).toExist();
                     selectBasicSettings();
                     $(".wrapper-modal-window .action-save").click();
                     AjaxHelpers.expectJsonRequest(requests, 'POST', '/xblock/mock-section', {
