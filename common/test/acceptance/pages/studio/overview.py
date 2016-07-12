@@ -1054,10 +1054,10 @@ class CourseOutlineModal(object):
         Returns true if the explict staff lock checkbox is checked, false otherwise.
         """
         self.ensure_staff_lock_visible()
-        return (
-            self.find_css('input[name=content-visibility][value=staff_only]')[0].is_selected() or
-            self.find_css('#staff_lock')[0].is_selected()
-        )
+        if self.find_css('input[name=content-visibility]').visible:
+            return self.find_css('input[name=content-visibility][value=staff_only]')[0].is_selected()
+        else:
+            return self.find_css('#staff_lock')[0].is_selected()
 
     @is_explicitly_locked.setter
     def is_explicitly_locked(self, value):

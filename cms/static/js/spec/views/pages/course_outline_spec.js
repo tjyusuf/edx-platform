@@ -848,7 +848,7 @@ define(["jquery", "edx-ui-toolkit/js/utils/spec-helpers/ajax-helpers", "common/j
                         "isPrereq": false,
                         "metadata":{
                             "visible_to_staff_only": true,
-                            //"content_visibility": null,
+                            "hide_after_due": false,
                             "start":"2014-07-09T00:00:00.000Z",
                             "due":"2014-07-10T00:00:00.000Z",
                             "exam_review_rules": "",
@@ -1312,7 +1312,7 @@ define(["jquery", "edx-ui-toolkit/js/utils/spec-helpers/ajax-helpers", "common/j
                     createCourseOutlinePage(this, mockCourseJSON, false);
                     outlinePage.$('.outline-item .outline-subsection .configure-button').click();
                     setEditModalValues("7/9/2014", "7/10/2014", "Lab");
-                    //set staff_only here
+                    setContentVisibility("staff_only");
                     $(".wrapper-modal-window .action-save").click();
 
                     // This is the response for the change operation.
@@ -1337,7 +1337,7 @@ define(["jquery", "edx-ui-toolkit/js/utils/spec-helpers/ajax-helpers", "common/j
                     expect($("#start_date").val()).toBe('7/9/2014');
                     expect($("#due_date").val()).toBe('7/10/2014');
                     expect($("#grading_type").val()).toBe('Lab');
-                    // Ensure staff_only is set here
+                    expect($("input[name=content-visibility][value-staff_only]").is(":checked")).toBe(true);
 
                     $(".wrapper-modal-window .scheduled-date-input .action-clear").click();
                     $(".wrapper-modal-window .due-date-input .action-clear").click();
@@ -1345,7 +1345,7 @@ define(["jquery", "edx-ui-toolkit/js/utils/spec-helpers/ajax-helpers", "common/j
                     expect($("#due_date").val()).toBe('');
 
                     $("#grading_type").val('notgraded');
-                    // set to fully visible here
+                    setContentVisibility("visible");
 
                     $(".wrapper-modal-window .action-save").click();
 
