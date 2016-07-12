@@ -1033,25 +1033,48 @@ class CourseOutlineModal(object):
         ).fulfill()
 
     @property
+    def is_staff_lock_visible(self):
+        """
+        Returns true if the staff lock option is visible, either as a checkbox
+        (section and unit levels) or a radio button (subsection level).
+        """
+        return self.find_css('#staff_lock').visible or self.find_css('input[name=content-visibility]').visible
+
+    def ensure_staff_lock_visible(self):
+        """
+        Ensures the staff lock option is visible, clicking on the advanced tab
+        if needed.
+        """
+        if not self.is_staff_lock_visible:
+            self.find_css(".settings-tab-button[data-tab=advanced]").click()
+
+    @property
     def is_explicitly_locked(self):
         """
         Returns true if the explict staff lock checkbox is checked, false otherwise.
         """
-        if not self.find_css('input[name=content-visibility]').visible:
-            self.find_css(".settings-tab-button[data-tab=advanced]").click()
-        return self.find_css('input[name=content-visibility][value=staff_only]')[0].is_selected()
+        self.ensure_staff_lock_visible()
+        return (
+            self.find_css('input[name=content-visibility][value=staff_only]')[0].is_selected() or
+            self.find_css('#staff_lock')[0].is_selected()
+        )
 
     @is_explicitly_locked.setter
     def is_explicitly_locked(self, value):
         """
         Checks the explicit staff lock box if value is true, otherwise selects "visible".
         """
-        if not self.find_css('input[name=content-visibility]').visible:
-            self.find_css(".settings-tab-button[data-tab=advanced]").click()
-        if value:
-            self.find_css('input[name=content-visibility][value=staff_only]').click()
+        self.ensure_staff_lock_visible()
+        if self.find_css('#staff_lock').visible:
+            # Section or unit level - select checkbox as needed
+            if value != self.is_explicitly_locked:
+                self.find_css('label[for="staff_lock"]').click()
         else:
-            self.find_css('input[name=content-visibility][value=visible]').click()
+            # Subsection level - select correct radio button
+            if value:
+                self.find_css('input[name=content-visibility][value=staff_only]').click()
+            else:
+                self.find_css('input[name=content-visibility][value=visible]').click()
         EmptyPromise(lambda: value == self.is_explicitly_locked, "Explicit staff lock is updated").fulfill()
 
     def shows_staff_lock_warning(self):
