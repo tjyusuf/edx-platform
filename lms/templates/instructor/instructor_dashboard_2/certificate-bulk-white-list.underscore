@@ -5,14 +5,14 @@
     </p>
     <form id="bulk-white-list-exception-form" enctype="multipart/form-data">
         <div class="customBrowseBtn">
-          <label for="browseBtn-bulk-csv">${_("Upload a CSV file")}</label>
+          <label for="browseBtn-bulk-csv"><%- gettext("Upload a CSV file") %></label>
           <span class="browse-file" id="bulk-exception-upload"></span>
           <div class="file-browse btn btn-primary" aria-hidden="true">
-              <span class="browse">${('Browse')}</span>
+              <span class="browse"><%- gettext("Browse") %></span>
               <input class="file_field" id="browseBtn-bulk-csv" name="students_list" type="file" accept=".csv"/>
           </div>
         </div>
-        <button class="btn-blue upload-csv-button" type="submit" disabled="disabled"><%- gettext('Add to Exception List') %></button>
+        <button class="btn-blue upload-csv-button" type="submit" disabled="disabled"><%- gettext("Add to Exception List") %></button>
     </form>
     <div class="bulk-exception-results hidden"></div>
 </div>
