@@ -1,5 +1,5 @@
 """
-Proctored Exams Transformer
+Milestones Transformer
 """
 
 from django.conf import settings
@@ -7,9 +7,10 @@ from django.conf import settings
 from edx_proctoring.api import get_attempt_status_summary
 from edx_proctoring.models import ProctoredExamStudentAttemptStatus
 from openedx.core.lib.block_structure.transformer import BlockStructureTransformer, FilteringTransformerMixin
+from util import milestones_helpers
 
 
-class ProctoredExamTransformer(FilteringTransformerMixin, BlockStructureTransformer):
+class MilestonesTransformer(FilteringTransformerMixin, BlockStructureTransformer):
     """
     Exclude proctored exams unless the user is not a verified student or has
     declined taking the exam.
@@ -19,7 +20,7 @@ class ProctoredExamTransformer(FilteringTransformerMixin, BlockStructureTransfor
 
     @classmethod
     def name(cls):
-        return "proctored_exam"
+        return "milestones"
 
     @classmethod
     def collect(cls, block_structure):
@@ -36,11 +37,12 @@ class ProctoredExamTransformer(FilteringTransformerMixin, BlockStructureTransfor
     def transform_block_filters(self, usage_info, block_structure):
         if not settings.FEATURES.get('ENABLE_PROCTORED_EXAMS', False):
             return [block_structure.create_universal_filter()]
+        # this needs to change ^^^
 
-        def is_proctored_exam_for_user(block_key):
+        def has_milestones_for_user(block_key):
             """
             Test whether the block is a proctored exam for the user in
-            question.
+            question, or requires any other unfulfilled milestones.
             """
             if (
                     block_key.block_type == 'sequential' and (
@@ -55,6 +57,18 @@ class ProctoredExamTransformer(FilteringTransformerMixin, BlockStructureTransfor
                     unicode(block_key.course_key),
                     unicode(block_key),
                 )
-                return user_exam_summary and user_exam_summary['status'] != ProctoredExamStudentAttemptStatus.declined
+                exam_is_proctored = user_exam_summary and \
+                                    user_exam_summary['status'] != ProctoredExamStudentAttemptStatus.declined
 
-        return [block_structure.create_removal_filter(is_proctored_exam_for_user)]
+                # after checking for proctored, we check for all other milestones
+                # if we need additional fields bump up version number
+                milestones_exist_for_exam = bool(milestones_helpers.get_course_content_milestones(
+                                                    unicode(block_key.course_key),
+                                                    unicode(block_key),
+                                                    'requires',
+                                                    usage_info.user.id
+                                                ))
+                return exam_is_proctored or milestones_exist_for_exam
+
+        return [block_structure.create_removal_filter(has_milestones_for_user)]
+
