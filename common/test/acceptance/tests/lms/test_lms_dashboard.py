@@ -116,7 +116,7 @@ class BaseLmsDashboardTestMultiple(UniqueCourseTest):
             })
 
             course_fixture.install()
-            
+
             self.course_keys[key] = course_key
             self.course_fixtures[key] = course_fixture
 
