@@ -29,6 +29,47 @@ class BaseLmsDashboardTest(UniqueCourseTest):
         self.dashboard_page = DashboardPage(self.browser)
 
         # Configure some aspects of the test course and install the settings into the course
+        self.course_fixture = CourseFixture(
+            self.course_info["org"],
+            self.course_info["number"],
+            self.course_info["run"],
+            self.course_info["display_name"],
+        )
+        self.course_fixture.add_advanced_settings({
+            u"social_sharing_url": {u"value": "http://custom/course/url"}
+        })
+        self.course_fixture.install()
+
+        self.username = "test_{uuid}".format(uuid=self.unique_id[0:6])
+        self.email = "{user}@example.com".format(user=self.username)
+
+        # Create the test user, register them for the course, and authenticate
+        AutoAuthPage(
+            self.browser,
+            username=self.username,
+            email=self.email,
+            course_id=self.course_id
+        ).visit()
+
+        # Navigate the authenticated, enrolled user to the dashboard page and get testing!
+        self.dashboard_page.visit()
+
+
+class BaseLmsDashboardTestMultiple(UniqueCourseTest):
+    """ Base test suite for the LMS Student Dashboard with Multiple Courses"""
+
+    def setUp(self):
+        """
+        Initializes the components (page objects, courses, users) for this test suite
+        """
+        # Some parameters are provided by the parent setUp() routine, such as the following:
+        # self.course_id, self.course_info, self.unique_id
+        super(BaseLmsDashboardTestMultiple, self).setUp()
+
+        # Load page objects for use by the tests
+        self.dashboard_page = DashboardPage(self.browser)
+
+        # Configure some aspects of the test course and install the settings into the course
         self.courses = {
             'A': {
                 'org': 'test_org',
@@ -146,8 +187,10 @@ class LmsDashboardPageTest(BaseLmsDashboardTest):
         course_start_date = datetime.datetime(1970, 1, 1)
         course_end_date = self.now - datetime.timedelta(days=90)
 
-        self.course_fixture.add_course_details({'start_date': course_start_date,
-                                                'end_date': course_end_date})
+        self.course_fixture.add_course_details({
+            'start_date': course_start_date,
+            'end_date': course_end_date
+        })
         self.course_fixture.configure_course()
 
         end_date = course_end_date.strftime(DEFAULT_SHORT_DATE_FORMAT)
@@ -177,8 +220,10 @@ class LmsDashboardPageTest(BaseLmsDashboardTest):
         course_start_date = datetime.datetime(1970, 1, 1)
         course_end_date = self.now + datetime.timedelta(days=90)
 
-        self.course_fixture.add_course_details({'start_date': course_start_date,
-                                                'end_date': course_end_date})
+        self.course_fixture.add_course_details({
+            'start_date': course_start_date,
+            'end_date': course_end_date
+        })
         self.course_fixture.configure_course()
 
         start_date = course_start_date.strftime(DEFAULT_SHORT_DATE_FORMAT)
@@ -208,8 +253,10 @@ class LmsDashboardPageTest(BaseLmsDashboardTest):
         course_start_date = self.now + datetime.timedelta(days=30)
         course_end_date = self.now + datetime.timedelta(days=365)
 
-        self.course_fixture.add_course_details({'start_date': course_start_date,
-                                                'end_date': course_end_date})
+        self.course_fixture.add_course_details({
+            'start_date': course_start_date,
+            'end_date': course_end_date
+        })
         self.course_fixture.configure_course()
 
         start_date = course_start_date.strftime(DEFAULT_SHORT_DATE_FORMAT)
@@ -240,8 +287,10 @@ class LmsDashboardPageTest(BaseLmsDashboardTest):
         course_start_date = self.now + datetime.timedelta(days=2)
         course_end_date = self.now + datetime.timedelta(days=365)
 
-        self.course_fixture.add_course_details({'start_date': course_start_date,
-                                                'end_date': course_end_date})
+        self.course_fixture.add_course_details({
+            'start_date': course_start_date,
+            'end_date': course_end_date
+        })
         self.course_fixture.configure_course()
 
         start_date = course_start_date.strftime(DEFAULT_DAY_AND_TIME_FORMAT)
@@ -258,7 +307,7 @@ class LmsDashboardPageTest(BaseLmsDashboardTest):
 
 
 @attr('a11y')
-class LmsDashboardA11yTest(BaseLmsDashboardTest):
+class LmsDashboardA11yTest(BaseLmsDashboardTestMultiple):
     """
     Class to test lms student dashboard accessibility.
     """
